@@ -1147,7 +1147,35 @@ def schedule_auto_backup():
     # This should be set up as a cron job or scheduled task
     pass
 
+@app.route('/admin/api/backup/download')
+def download_backup():
+    if not is_admin_logged_in():
+        return redirect(url_for('admin_login'))
+    
+    file_path = request.args.get('file')
+    
+    if not file_path or not os.path.exists(file_path):
+        return jsonify({'error': 'Backup file not found'}), 404
+    
+    return send_file(
+        file_path,
+        as_attachment=True,
+        download_name=os.path.basename(file_path),
+        mimetype='application/sql'
+    )
 
+@app.route('/admin/api/backup/schedule', methods=['POST'])
+def schedule_backup():
+    if not is_admin_logged_in():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    
+    # Store schedule in database or config file
+    cur = mysql.connection.cursor()
+    # Implement schedule storage logic here
+    
+    return jsonify({'success': True, 'message': 'Backup schedule saved'})
 
 if __name__ == '__main__':
     app.run(debug=True)

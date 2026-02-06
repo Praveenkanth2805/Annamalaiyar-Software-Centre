@@ -6,49 +6,66 @@
         </h2>
         <p>Annamalaiyar Software Centre</p>
     </div>
-    
+
+    {% set ep = request.endpoint %}
+
     <ul class="nav-menu">
+
         <li class="nav-item">
-            <a href="{{ url_for('admin_dashboard') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_dashboard' else '' }}">
+            <a href="{{ url_for('admin_dashboard') }}"
+               class="nav-link {% if ep == 'admin_dashboard' %}active{% endif %}">
                 <span class="material-icons">dashboard</span>
                 <span>Dashboard</span>
             </a>
         </li>
+
         <li class="nav-item">
-            <a href="{{ url_for('admin_products') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_products' else '' }}">
+            <a href="{{ url_for('admin_products') }}"
+               class="nav-link {% if ep == 'admin_products' %}active{% endif %}">
                 <span class="material-icons">inventory</span>
                 <span>Products</span>
             </a>
         </li>
+
         <li class="nav-item">
-            <a href="{{ url_for('admin_courses') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_courses' else '' }}">
+            <a href="{{ url_for('admin_courses') }}"
+               class="nav-link {% if ep == 'admin_courses' %}active{% endif %}">
                 <span class="material-icons">school</span>
                 <span>Courses</span>
             </a>
         </li>
+
         <li class="nav-item">
-            <a href="{{ url_for('admin_orders') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_orders' else '' }}">
+            <a href="{{ url_for('admin_orders') }}"
+               class="nav-link {% if ep == 'admin_orders' %}active{% endif %}">
                 <span class="material-icons">shopping_cart</span>
                 <span>Orders</span>
             </a>
         </li>
+
         <li class="nav-item">
-            <a href="{{ url_for('admin_customers') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_customers' else '' }}">
+            <a href="{{ url_for('admin_customers') }}"
+               class="nav-link {% if ep == 'admin_customers' %}active{% endif %}">
                 <span class="material-icons">people</span>
                 <span>Customers</span>
             </a>
         </li>
+
         <li class="nav-item">
-            <a href="{{ url_for('admin_reports') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_reports' else '' }}">
+            <a href="{{ url_for('admin_reports') }}"
+               class="nav-link {% if ep == 'admin_reports' %}active{% endif %}">
                 <span class="material-icons">assessment</span>
                 <span>Reports</span>
             </a>
         </li>
+
         <li class="nav-item">
-            <a href="{{ url_for('admin_backup') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_backup' else '' }}">
+            <a href="{{ url_for('admin_backup') }}"
+               class="nav-link {% if ep == 'admin_backup' %}active{% endif %}">
                 <span class="material-icons">backup</span>
                 <span>Backup</span>
             </a>
         </li>
+
     </ul>
 </aside>

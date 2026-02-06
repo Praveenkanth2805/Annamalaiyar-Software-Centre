@@ -1,5 +1,14 @@
 <header class="topbar">
-    <h1>{% block page_title %}{% endblock %}</h1>
+    <h1>
+        {% if request.endpoint == 'admin_dashboard' %}Dashboard
+        {% elif request.endpoint == 'admin_products' %}Products
+        {% elif request.endpoint == 'admin_courses' %}Courses
+        {% elif request.endpoint == 'admin_orders' %}Orders
+        {% elif request.endpoint == 'admin_customers' %}Customers
+        {% elif request.endpoint == 'admin_reports' %}Reports
+        {% elif request.endpoint == 'admin_backup' %}Backup
+        {% else %}Admin Panel{% endif %}
+    </h1>
     <div class="user-info">
         <div class="user-avatar">
             <span class="material-icons">person</span>
