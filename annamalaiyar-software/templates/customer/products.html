@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1><span class="material-icons">apps</span> {{ translations.products }}</h1>
+        <p>{{ translations.all_products_description }}</p>
+    </div>
+
+    <div class="search-filter">
+        <div class="search-box">
+            <span class="material-icons">search</span>
+            <input type="text" id="productSearch" placeholder="{{ translations.search_products }}">
+        </div>
+    </div>
+
+    <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card">
+            <div class="product-image">
+                {% if product[5] %}
+                    <img src="{{ url_for('static', filename='uploads/' + product[5]) }}" alt="{{ product[1] }}">
+                {% else %}
+                    <div class="placeholder-image">
+                        <span class="material-icons">image</span>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="product-info">
+                <h3>{{ product[1] }}</h3>
+                <p class="product-description">{{ product[2] }}</p>
+                <div class="product-meta">
+                    <span class="stock {% if product[4] <= 0 %}out-of-stock{% elif product[4] <= 5 %}low-stock{% endif %}">
+                        <span class="material-icons">inventory</span>
+                        {% if product[4] <= 0 %}
+                            {{ translations.out_of_stock }}
+                        {% else %}
+                            {{ product[4] }} {{ translations.in_stock }}
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="product-price">₹{{ product[3] }}</div>
+                <div class="product-actions">
+                    {% if product[4] > 0 %}
+                    <a href="{{ url_for('order', type='product', id=product[0]) }}" class="btn btn-primary">
+                        <span class="material-icons">add_shopping_cart</span>
+                        {{ translations.order_now }}
+                    </a>
+                    {% else %}
+                    <button class="btn btn-disabled" disabled>
+                        <span class="material-icons">block</span>
+                        {{ translations.out_of_stock }}
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="no-results">
+            <span class="material-icons">inbox</span>
+            <h3>{{ translations.no_products_found }}</h3>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Product search functionality
+    document.getElementById('productSearch').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const productCards = document.querySelectorAll('.product-card');
+        
+        productCards.forEach(card => {
+            const productName = card.querySelector('h3').textContent.toLowerCase();
+            const productDesc = card.querySelector('.product-description').textContent.toLowerCase();
+            
+            if (productName.includes(searchTerm) || productDesc.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

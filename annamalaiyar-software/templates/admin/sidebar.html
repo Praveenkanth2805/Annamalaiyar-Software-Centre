@@ -1,0 +1,54 @@
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <h2>
+            <span class="material-icons">admin_panel_settings</span>
+            <span>Admin Panel</span>
+        </h2>
+        <p>Annamalaiyar Software Centre</p>
+    </div>
+    
+    <ul class="nav-menu">
+        <li class="nav-item">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_dashboard' else '' }}">
+                <span class="material-icons">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('admin_products') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_products' else '' }}">
+                <span class="material-icons">inventory</span>
+                <span>Products</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('admin_courses') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_courses' else '' }}">
+                <span class="material-icons">school</span>
+                <span>Courses</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('admin_orders') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_orders' else '' }}">
+                <span class="material-icons">shopping_cart</span>
+                <span>Orders</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('admin_customers') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_customers' else '' }}">
+                <span class="material-icons">people</span>
+                <span>Customers</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('admin_reports') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_reports' else '' }}">
+                <span class="material-icons">assessment</span>
+                <span>Reports</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('admin_backup') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_backup' else '' }}">
+                <span class="material-icons">backup</span>
+                <span>Backup</span>
+            </a>
+        </li>
+    </ul>
+</aside>

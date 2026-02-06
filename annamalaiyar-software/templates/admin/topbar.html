@@ -1,0 +1,16 @@
+<header class="topbar">
+    <h1>{% block page_title %}{% endblock %}</h1>
+    <div class="user-info">
+        <div class="user-avatar">
+            <span class="material-icons">person</span>
+        </div>
+        <div>
+            <strong>{{ session['admin_username'] }}</strong>
+            <div style="font-size: 0.9rem; color: #666;">Administrator</div>
+        </div>
+        <a href="{{ url_for('admin_logout') }}" class="logout-btn">
+            <span class="material-icons">logout</span>
+            Logout
+        </a>
+    </div>
+</header>

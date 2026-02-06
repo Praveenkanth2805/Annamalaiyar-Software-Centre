@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1><span class="material-icons">school</span> {{ translations.courses }}</h1>
+        <p>{{ translations.all_courses_description }}</p>
+    </div>
+
+    <div class="search-filter">
+        <div class="search-box">
+            <span class="material-icons">search</span>
+            <input type="text" id="courseSearch" placeholder="{{ translations.search_courses }}">
+        </div>
+    </div>
+
+    <div class="courses-grid">
+        {% for course in courses %}
+        <div class="course-card">
+            <div class="course-image">
+                {% if course[6] %}
+                    <img src="{{ url_for('static', filename='uploads/' + course[6]) }}" alt="{{ course[1] }}">
+                {% else %}
+                    <div class="placeholder-image">
+                        <span class="material-icons">school</span>
+                    </div>
+                {% endif %}
+                {% if course[5] <= 5 and course[5] > 0 %}
+                <div class="seat-badge">
+                    <span class="material-icons">warning</span>
+                    {{ course[5] }} {{ translations.seats_left }}
+                </div>
+                {% elif course[5] == 0 %}
+                <div class="seat-badge full">
+                    <span class="material-icons">block</span>
+                    {{ translations.full }}
+                </div>
+                {% endif %}
+            </div>
+            <div class="course-info">
+                <h3>{{ course[1] }}</h3>
+                <p class="course-description">{{ course[2] }}</p>
+                <div class="course-meta">
+                    <span class="duration">
+                        <span class="material-icons">schedule</span>
+                        {{ course[3] }}
+                    </span>
+                    <span class="seats">
+                        <span class="material-icons">people</span>
+                        {{ course[5] }} {{ translations.seats_available }}
+                    </span>
+                </div>
+                <div class="course-price">₹{{ course[4] }}</div>
+                <div class="course-actions">
+                    {% if course[5] > 0 %}
+                    <a href="{{ url_for('order', type='course', id=course[0]) }}" class="btn btn-primary">
+                        <span class="material-icons">book</span>
+                        {{ translations.enroll_now }}
+                    </a>
+                    {% else %}
+                    <button class="btn btn-disabled" disabled>
+                        <span class="material-icons">block</span>
+                        {{ translations.course_full }}
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="no-results">
+            <span class="material-icons">inbox</span>
+            <h3>{{ translations.no_courses_found }}</h3>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Course search functionality
+    document.getElementById('courseSearch').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const courseCards = document.querySelectorAll('.course-card');
+        
+        courseCards.forEach(card => {
+            const courseName = card.querySelector('h3').textContent.toLowerCase();
+            const courseDesc = card.querySelector('.course-description').textContent.toLowerCase();
+            
+            if (courseName.includes(searchTerm) || courseDesc.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

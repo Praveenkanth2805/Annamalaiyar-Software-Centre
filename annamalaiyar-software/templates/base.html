@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annamalaiyar Software Centre</title>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Material CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/material.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('home') }}" class="logo">
+                <span class="material-icons">code</span>
+                <span>Annamalaiyar Software Centre</span>
+            </a>
+            
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}">
+                    <span class="material-icons">home</span>
+                    {{ translations.home }}
+                </a>
+                <a href="{{ url_for('products') }}">
+                    <span class="material-icons">apps</span>
+                    {{ translations.products }}
+                </a>
+                <a href="{{ url_for('courses') }}">
+                    <span class="material-icons">school</span>
+                    {{ translations.courses }}
+                </a>
+                <div class="language-switch">
+                    <a href="{{ url_for('change_language', lang='en') }}" class="{{ 'active' if lang == 'en' else '' }}">EN</a>
+                    <span>|</span>
+                    <a href="{{ url_for('change_language', lang='ta') }}" class="{{ 'active' if lang == 'ta' else '' }}">தமிழ்</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">
+                        <span class="material-icons">
+                            {% if category == 'success' %}check_circle{% else %}error{% endif %}
+                        </span>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 Annamalaiyar Software Centre. {{ translations.all_rights_reserved }}</p>
+            <div class="footer-links">
+                <a href="#">{{ translations.contact }}</a>
+                <a href="#">{{ translations.privacy }}</a>
+                <a href="#">{{ translations.terms }}</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

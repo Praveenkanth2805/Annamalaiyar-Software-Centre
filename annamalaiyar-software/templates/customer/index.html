@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1>{{ translations.welcome_title }}</h1>
+        <p>{{ translations.welcome_subtitle }}</p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('products') }}" class="btn btn-primary">
+                <span class="material-icons">shopping_cart</span>
+                {{ translations.browse_products }}
+            </a>
+            <a href="{{ url_for('courses') }}" class="btn btn-secondary">
+                <span class="material-icons">school</span>
+                {{ translations.view_courses }}
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Featured Products -->
+    <section class="section">
+        <div class="section-header">
+            <h2><span class="material-icons">star</span> {{ translations.featured_products }}</h2>
+            <a href="{{ url_for('products') }}" class="view-all">
+                {{ translations.view_all }} <span class="material-icons">arrow_forward</span>
+            </a>
+        </div>
+        
+        <div class="products-grid">
+            {% for product in featured_products %}
+            <div class="product-card">
+                <div class="product-image">
+                    {% if product[5] %}
+                        <img src="{{ url_for('static', filename='uploads/' + product[5]) }}" alt="{{ product[1] }}">
+                    {% else %}
+                        <div class="placeholder-image">
+                            <span class="material-icons">image</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <h3>{{ product[1] }}</h3>
+                    <p class="product-description">{{ product[2][:100] }}{% if product[2]|length > 100 %}...{% endif %}</p>
+                    <div class="product-price">₹{{ product[3] }}</div>
+                    <div class="product-actions">
+                        <a href="{{ url_for('order', type='product', id=product[0]) }}" class="btn btn-small btn-primary">
+                            <span class="material-icons">add_shopping_cart</span>
+                            {{ translations.order_now }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Featured Courses -->
+    <section class="section">
+        <div class="section-header">
+            <h2><span class="material-icons">local_library</span> {{ translations.featured_courses }}</h2>
+            <a href="{{ url_for('courses') }}" class="view-all">
+                {{ translations.view_all }} <span class="material-icons">arrow_forward</span>
+            </a>
+        </div>
+        
+        <div class="courses-grid">
+            {% for course in featured_courses %}
+            <div class="course-card">
+                <div class="course-image">
+                    {% if course[6] %}
+                        <img src="{{ url_for('static', filename='uploads/' + course[6]) }}" alt="{{ course[1] }}">
+                    {% else %}
+                        <div class="placeholder-image">
+                            <span class="material-icons">school</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="course-info">
+                    <h3>{{ course[1] }}</h3>
+                    <p class="course-description">{{ course[2][:100] }}{% if course[2]|length > 100 %}...{% endif %}</p>
+                    <div class="course-details">
+                        <span class="duration">
+                            <span class="material-icons">schedule</span>
+                            {{ course[3] }}
+                        </span>
+                        <span class="seats">
+                            <span class="material-icons">people</span>
+                            {{ course[5] }} {{ translations.seats }}
+                        </span>
+                    </div>
+                    <div class="course-price">₹{{ course[4] }}</div>
+                    <div class="course-actions">
+                        <a href="{{ url_for('order', type='course', id=course[0]) }}" class="btn btn-small btn-primary">
+                            <span class="material-icons">book</span>
+                            {{ translations.enroll_now }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

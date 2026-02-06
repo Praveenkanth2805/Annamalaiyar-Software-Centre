@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="order-page">
+        <div class="order-summary">
+            <h2><span class="material-icons">shopping_bag</span> {{ translations.order_summary }}</h2>
+            <div class="summary-card">
+                {% if item_type == 'product' %}
+                <div class="item-image">
+                    {% if item[5] %}
+                        <img src="{{ url_for('static', filename='uploads/' + item[5]) }}" alt="{{ item[1] }}">
+                    {% else %}
+                        <div class="placeholder-image">
+                            <span class="material-icons">image</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="item-details">
+                    <h3>{{ item[1] }}</h3>
+                    <p>{{ item[2] }}</p>
+                    <div class="item-price">
+                        <span>{{ translations.price }}:</span>
+                        <strong>₹{{ item[3] }}</strong>
+                    </div>
+                    {% if item[4] <= 5 and item[4] > 0 %}
+                    <div class="stock-warning">
+                        <span class="material-icons">warning</span>
+                        Only {{ item[4] }} {{ translations.left_in_stock }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="item-image">
+                    {% if item[6] %}
+                        <img src="{{ url_for('static', filename='uploads/' + item[6]) }}" alt="{{ item[1] }}">
+                    {% else %}
+                        <div class="placeholder-image">
+                            <span class="material-icons">school</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="item-details">
+                    <h3>{{ item[1] }}</h3>
+                    <p>{{ item[2] }}</p>
+                    <div class="item-meta">
+                        <span class="duration">
+                            <span class="material-icons">schedule</span>
+                            {{ item[3] }}
+                        </span>
+                        <span class="seats">
+                            <span class="material-icons">people</span>
+                            {{ item[5] }} {{ translations.seats_available }}
+                        </span>
+                    </div>
+                    <div class="item-price">
+                        <span>{{ translations.price }}:</span>
+                        <strong>₹{{ item[4] }}</strong>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="order-form-section">
+            <h2><span class="material-icons">person</span> {{ translations.customer_details }}</h2>
+            
+            <form method="POST" class="order-form">
+                <input type="hidden" name="item_type" value="{{ item_type }}">
+                <input type="hidden" name="item_id" value="{{ item_id }}">
+                
+                <div class="form-group">
+                    <label for="name">
+                        <span class="material-icons">person</span>
+                        {{ translations.full_name }} *
+                    </label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">
+                            <span class="material-icons">phone</span>
+                            {{ translations.phone }} *
+                        </label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">
+                            <span class="material-icons">email</span>
+                            {{ translations.email }}
+                        </label>
+                        <input type="email" id="email" name="email">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="address">
+                        <span class="material-icons">location_on</span>
+                        {{ translations.address }} *
+                    </label>
+                    <textarea id="address" name="address" rows="3" required></textarea>
+                </div>
+                
+                {% if item_type == 'product' %}
+                <div class="form-group">
+                    <label for="quantity">
+                        <span class="material-icons">format_list_numbered</span>
+                        {{ translations.quantity }} *
+                    </label>
+                    <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ item[4] }}" required>
+                </div>
+                {% endif %}
+                
+                <div class="price-calculation">
+                    <div class="price-row">
+                        <span>{{ translations.item_price }}:</span>
+                        <span id="unitPrice">₹{{ item[3] if item_type == 'product' else item[4] }}</span>
+                    </div>
+                    {% if item_type == 'product' %}
+                    <div class="price-row">
+                        <span>{{ translations.quantity }}:</span>
+                        <span id="quantityDisplay">1</span>
+                    </div>
+                    {% endif %}
+                    <div class="price-row total">
+                        <span>{{ translations.total_price }}:</span>
+                        <span id="totalPrice">₹{{ item[3] if item_type == 'product' else item[4] }}</span>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <span class="material-icons">check_circle</span>
+                        {{ translations.place_order }}
+                    </button>
+                    <a href="{% if item_type == 'product' %}{{ url_for('products') }}{% else %}{{ url_for('courses') }}{% endif %}" class="btn btn-secondary">
+                        <span class="material-icons">arrow_back</span>
+                        {{ translations.go_back }}
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    {% if item_type == 'product' %}
+    // Live price calculation for products
+    const unitPrice = {{ item[3] }};
+    const maxStock = {{ item[4] }};
+    
+    function updatePrice() {
+        const quantity = parseInt(document.getElementById('quantity').value) || 1;
+        const totalPrice = unitPrice * quantity;
+        
+        document.getElementById('quantityDisplay').textContent = quantity;
+        document.getElementById('totalPrice').textContent = '₹' + totalPrice;
+    }
+    
+    document.getElementById('quantity').addEventListener('input', function(e) {
+        let value = parseInt(e.target.value);
+        
+        if (value < 1) value = 1;
+        if (value > maxStock) value = maxStock;
+        
+        e.target.value = value;
+        updatePrice();
+    });
+    
+    updatePrice();
+    {% endif %}
+</script>
+{% endblock %}

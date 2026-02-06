@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Annamalaiyar Software Centre</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-color: #1f2937;
+            --light-color: #f9fafb;
+            --gray-color: #9ca3af;
+            --border-color: #e5e7eb;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+        
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .sidebar-header p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .nav-link.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left: 4px solid white;
+        }
+        
+        .nav-link .material-icons {
+            font-size: 20px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+        }
+        
+        /* Topbar */
+        .topbar {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        /* Content Area */
+        .content-area {
+            padding: 30px;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .page-subtitle {
+            color: var(--gray-color);
+            margin-bottom: 30px;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .stat-icon.total { background: #dbeafe; color: #1d4ed8; }
+        .stat-icon.pending { background: #fef3c7; color: #d97706; }
+        .stat-icon.delivered { background: #d1fae5; color: #047857; }
+        .stat-icon.sales { background: #f3e8ff; color: #7c3aed; }
+        
+        .stat-info h3 {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-change {
+            font-size: 0.9rem;
+        }
+        
+        .stat-change.positive { color: var(--success-color); }
+        .stat-change.negative { color: var(--danger-color); }
+        
+        /* Recent Orders */
+        .recent-orders {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 25px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-header h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .view-all-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th {
+            text-align: left;
+            padding: 12px 15px;
+            background: var(--light-color);
+            color: var(--gray-color);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .data-table tr:hover {
+            background: var(--light-color);
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-paid { background: #d1fae5; color: #047857; }
+        .status-delivered { background: #d1fae5; color: #047857; }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+        }
+        
+        .btn-view { background: #dbeafe; color: #1d4ed8; }
+        .btn-edit { background: #fef3c7; color: #d97706; }
+        .btn-delete { background: #fee2e2; color: #ef4444; }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray-color);
+        }
+        
+        .no-data .material-icons {
+            font-size: 48px;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar-header h2 span:last-child,
+            .nav-link span:last-child {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>
+                    <span class="material-icons">admin_panel_settings</span>
+                    <span>Admin Panel</span>
+                </h2>
+                <p>Annamalaiyar Software Centre</p>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_dashboard') }}" class="nav-link active">
+                        <span class="material-icons">dashboard</span>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="material-icons">inventory</span>
+                        <span>Products</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="material-icons">school</span>
+                        <span>Courses</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="material-icons">shopping_cart</span>
+                        <span>Orders</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="material-icons">people</span>
+                        <span>Customers</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="material-icons">assessment</span>
+                        <span>Reports</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="material-icons">backup</span>
+                        <span>Backup</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <h1>Dashboard</h1>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <span class="material-icons">person</span>
+                    </div>
+                    <div>
+                        <strong>{{ session['admin_username'] }}</strong>
+                        <div style="font-size: 0.9rem; color: #666;">Administrator</div>
+                    </div>
+                    <a href="{{ url_for('admin_logout') }}" class="logout-btn">
+                        <span class="material-icons">logout</span>
+                        Logout
+                    </a>
+                </div>
+            </header>
+            
+            <!-- Content Area -->
+            <div class="content-area">
+                <h1 class="page-title">
+                    <span class="material-icons">dashboard</span>
+                    Dashboard Overview
+                </h1>
+                <p class="page-subtitle">Welcome back! Here's what's happening with your store today.</p>
+                
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon total">
+                            <span class="material-icons">shopping_cart</span>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Orders</h3>
+                            <div class="stat-number">{{ total_orders }}</div>
+                            <div class="stat-change positive">+12% from last month</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon pending">
+                            <span class="material-icons">pending_actions</span>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Pending Payments</h3>
+                            <div class="stat-number">{{ pending_payments }}</div>
+                            <div class="stat-change negative">-5% from last week</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon delivered">
+                            <span class="material-icons">local_shipping</span>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Delivered Orders</h3>
+                            <div class="stat-number">{{ delivered_orders }}</div>
+                            <div class="stat-change positive">+18% from last month</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon sales">
+                            <span class="material-icons">currency_rupee</span>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Sales</h3>
+                            <div class="stat-number">₹{{ "%.2f"|format(total_sales) }}</div>
+                            <div class="stat-change positive">+24% from last month</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Orders -->
+                <div class="recent-orders">
+                    <div class="section-header">
+                        <h3>Recent Orders</h3>
+                        <a href="#" class="view-all-btn">
+                            View All
+                            <span class="material-icons">arrow_forward</span>
+                        </a>
+                    </div>
+                    
+                    <div class="table-container">
+                        {% if recent_orders %}
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Phone</th>
+                                    <th>Amount</th>
+                                    <th>Payment</th>
+                                    <th>Delivery</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td>#{{ order[0] }}</td>
+                                    <td>{{ order[1] }}</td>
+                                    <td>{{ order[2] }}</td>
+                                    <td>₹{{ order[3] }}</td>
+                                    <td>
+                                        <span class="status-badge status-{{ order[4].lower() }}">
+                                            {{ order[4] }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-{{ order[5].lower() }}">
+                                            {{ order[5] }}
+                                        </span>
+                                    </td>
+                                    <td>{{ order[6].strftime('%d-%m-%Y') }}</td>
+                                    <td>
+                                        <a href="#" class="action-btn btn-view">
+                                            <span class="material-icons">visibility</span>
+                                        </a>
+                                        <a href="#" class="action-btn btn-edit">
+                                            <span class="material-icons">edit</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="no-data">
+                            <span class="material-icons">inbox</span>
+                            <p>No orders found</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // Auto logout warning
+        let idleTime = 0;
+        
+        function resetIdleTime() {
+            idleTime = 0;
+        }
+        
+        function checkIdleTime() {
+            idleTime++;
+            if (idleTime > 25) { // 25 minutes
+                showLogoutWarning();
+            }
+            if (idleTime > 30) { // 30 minutes
+                window.location.href = "{{ url_for('admin_logout') }}";
+            }
+        }
+        
+        function showLogoutWarning() {
+            if (!document.getElementById('logout-warning')) {
+                const warning = document.createElement('div');
+                warning.id = 'logout-warning';
+                warning.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: var(--warning-color);
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 5px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    z-index: 1000;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                `;
+                warning.innerHTML = `
+                    <span class="material-icons">warning</span>
+                    <div>
+                        <strong>Session Timeout Warning</strong>
+                        <div style="font-size: 0.9rem;">You will be logged out in 5 minutes due to inactivity.</div>
+                    </div>
+                `;
+                document.body.appendChild(warning);
+                
+                setTimeout(() => warning.remove(), 5000);
+            }
+        }
+        
+        // Reset idle time on user activity
+        document.addEventListener('mousemove', resetIdleTime);
+        document.addEventListener('keypress', resetIdleTime);
+        document.addEventListener('click', resetIdleTime);
+        
+        // Check idle time every minute
+        setInterval(checkIdleTime, 60000);
+        
+        // Table row click
+        document.querySelectorAll('.data-table tbody tr').forEach(row => {
+            row.addEventListener('click', function(e) {
+                if (!e.target.closest('.action-btn')) {
+                    this.classList.toggle('selected');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

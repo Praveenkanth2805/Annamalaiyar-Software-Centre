@@ -1,0 +1,45 @@
+{
+    "home": "Home",
+    "products": "Products",
+    "courses": "Courses",
+    "contact": "Contact",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "all_rights_reserved": "All rights reserved.",
+    
+    "welcome_title": "Welcome to Annamalaiyar Software Centre",
+    "welcome_subtitle": "Your trusted partner for software solutions and training",
+    "browse_products": "Browse Products",
+    "view_courses": "View Courses",
+    
+    "featured_products": "Featured Products",
+    "featured_courses": "Featured Courses",
+    "view_all": "View All",
+    
+    "order_now": "Order Now",
+    "enroll_now": "Enroll Now",
+    "price": "Price",
+    "seats": "seats",
+    "in_stock": "in stock",
+    "out_of_stock": "Out of stock",
+    "left_in_stock": "left in stock",
+    
+    "all_products_description": "Browse our wide range of software products",
+    "search_products": "Search products...",
+    "no_products_found": "No products found",
+    
+    "order_summary": "Order Summary",
+    "customer_details": "Customer Details",
+    "full_name": "Full Name",
+    "phone": "Phone Number",
+    "email": "Email Address",
+    "address": "Delivery Address",
+    "quantity": "Quantity",
+    "item_price": "Item Price",
+    "total_price": "Total Price",
+    "place_order": "Place Order",
+    "go_back": "Go Back",
+    "order_success": "Order placed successfully!",
+    
+    "seats_available": "seats available"
+}

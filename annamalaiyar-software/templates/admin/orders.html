@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders Management - Annamalaiyar Software Centre</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reuse base styles */
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-color: #1f2937;
+            --light-color: #f9fafb;
+            --gray-color: #9ca3af;
+            --border-color: #e5e7eb;
+        }
+        
+        /* Same container, sidebar, topbar styles as products.html */
+        
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .order-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--success-color);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        .order-details {
+            padding: 15px;
+            background: var(--light-color);
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .order-details h4 {
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 8px;
+        }
+        
+        .detail-label {
+            font-weight: 500;
+            min-width: 120px;
+            color: var(--gray-color);
+        }
+        
+        .detail-value {
+            flex: 1;
+        }
+        
+        .export-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        {% include 'admin/sidebar.html' %}
+        
+        <main class="main-content">
+            {% include 'admin/topbar.html' %}
+            
+            <div class="content-area">
+                <h1 class="page-title">
+                    <span class="material-icons">shopping_cart</span>
+                    Orders Management
+                </h1>
+                <p class="page-subtitle">View and manage customer orders</p>
+                
+                <!-- Filters -->
+                <div class="filters">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="search">Search Orders</label>
+                            <input type="text" id="search" placeholder="Search by customer name, phone...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="paymentStatus">Payment Status</label>
+                            <select id="paymentStatus">
+                                <option value="">All</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Paid">Paid</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="deliveryStatus">Delivery Status</label>
+                            <select id="deliveryStatus">
+                                <option value="">All</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Delivered">Delivered</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="orderDate">Order Date</label>
+                            <input type="date" id="orderDate">
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" onclick="applyFilters()">
+                            <span class="material-icons">filter_list</span>
+                            Apply Filters
+                        </button>
+                        <button class="btn" onclick="resetFilters()">
+                            <span class="material-icons">refresh</span>
+                            Reset
+                        </button>
+                        <button class="export-btn" onclick="exportOrders()">
+                            <span class="material-icons">download</span>
+                            Export to Excel
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Orders Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Amount</th>
+                                <th>Payment</th>
+                                <th>Delivery</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>
+                                    <strong>{{ order.customer_name }}</strong><br>
+                                    <small>{{ order.customer_phone }}</small>
+                                </td>
+                                <td>
+                                    {% if order.product_name %}
+                                    <strong>Product:</strong> {{ order.product_name }}
+                                    {% else %}
+                                    <strong>Course:</strong> {{ order.course_name }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.quantity }}</td>
+                                <td>₹{{ order.total_price }}</td>
+                                <td>
+                                    <div class="order-status">
+                                        <span class="status-badge status-{{ order.payment_status.lower() }}">
+                                            {{ order.payment_status }}
+                                        </span>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" 
+                                                   onchange="updatePaymentStatus({{ order.id }}, this.checked)"
+                                                   {{ 'checked' if order.payment_status == 'Paid' else '' }}>
+                                            <span class="toggle-slider"></span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="order-status">
+                                        <span class="status-badge status-{{ order.delivery_status.lower() }}">
+                                            {{ order.delivery_status }}
+                                        </span>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" 
+                                                   onchange="updateDeliveryStatus({{ order.id }}, this.checked)"
+                                                   {{ 'checked' if order.delivery_status == 'Delivered' else '' }}>
+                                            <span class="toggle-slider"></span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ order.order_date.strftime('%d-%m-%Y') }}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-small btn-primary" onclick="viewOrderDetails({{ order.id }})">
+                                            <span class="material-icons">visibility</span>
+                                        </button>
+                                        <button class="btn btn-small btn-primary" onclick="editOrder({{ order.id }})">
+                                            <span class="material-icons">edit</span>
+                                        </button>
+                                        <button class="btn btn-small btn-danger" onclick="deleteOrder({{ order.id }})">
+                                            <span class="material-icons">delete</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="9">
+                                    <div class="no-data">
+                                        <span class="material-icons">shopping_cart</span>
+                                        <p>No orders found</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Order Details Modal -->
+                <div id="orderDetailsModal" class="modal">
+                    <div class="modal-content" style="max-width: 800px;">
+                        <div class="modal-header">
+                            <h2>Order Details - #<span id="orderId"></span></h2>
+                            <button onclick="closeDetailsModal()">×</button>
+                        </div>
+                        <div id="orderDetailsContent">
+                            <!-- Details loaded via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // View Order Details
+        function viewOrderDetails(orderId) {
+            fetch(`/admin/api/order/${orderId}`)
+                .then(response => response.json())
+                .then(order => {
+                    document.getElementById('orderId').textContent = order.id;
+                    
+                    let content = `
+                        <div class="order-details">
+                            <div class="detail-row">
+                                <div class="detail-label">Customer Name:</div>
+                                <div class="detail-value">${order.customer_name}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Phone:</div>
+                                <div class="detail-value">${order.customer_phone}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Email:</div>
+                                <div class="detail-value">${order.customer_email || 'N/A'}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Address:</div>
+                                <div class="detail-value">${order.customer_address}</div>
+                            </div>
+                            <hr>
+                            <div class="detail-row">
+                                <div class="detail-label">Item Type:</div>
+                                <div class="detail-value">${order.product_id ? 'Product' : 'Course'}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Item Name:</div>
+                                <div class="detail-value">${order.product_name || order.course_name}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Quantity:</div>
+                                <div class="detail-value">${order.quantity}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Total Price:</div>
+                                <div class="detail-value">₹${order.total_price}</div>
+                            </div>
+                            <hr>
+                            <div class="detail-row">
+                                <div class="detail-label">Order Date:</div>
+                                <div class="detail-value">${new Date(order.order_date).toLocaleString()}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Payment Status:</div>
+                                <div class="detail-value">
+                                    <span class="status-badge status-${order.payment_status.toLowerCase()}">
+                                        ${order.payment_status}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Delivery Status:</div>
+                                <div class="detail-value">
+                                    <span class="status-badge status-${order.delivery_status.toLowerCase()}">
+                                        ${order.delivery_status}
+                                    </span>
+                                </div>
+                            </div>
+                            ${order.remarks ? `
+                            <div class="detail-row">
+                                <div class="detail-label">Remarks:</div>
+                                <div class="detail-value">${order.remarks}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    document.getElementById('orderDetailsContent').innerHTML = content;
+                    document.getElementById('orderDetailsModal').style.display = 'flex';
+                });
+        }
+        
+        function closeDetailsModal() {
+            document.getElementById('orderDetailsModal').style.display = 'none';
+        }
+        
+        // Update Status Functions
+        function updatePaymentStatus(orderId, isPaid) {
+            const status = isPaid ? 'Paid' : 'Pending';
+            
+            fetch(`/admin/api/order/${orderId}/payment`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: status })
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                }
+            });
+        }
+        
+        function updateDeliveryStatus(orderId, isDelivered) {
+            const status = isDelivered ? 'Delivered' : 'Pending';
+            
+            fetch(`/admin/api/order/${orderId}/delivery`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: status })
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                }
+            });
+        }
+        
+        // Filter Functions
+        function applyFilters() {
+            const search = document.getElementById('search').value;
+            const paymentStatus = document.getElementById('paymentStatus').value;
+            const deliveryStatus = document.getElementById('deliveryStatus').value;
+            const orderDate = document.getElementById('orderDate').value;
+            
+            // Implement filtering logic
+            const rows = document.querySelectorAll('.data-table tbody tr');
+            
+            rows.forEach(row => {
+                const customerName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                const payment = row.querySelector('td:nth-child(6) .status-badge').textContent;
+                const delivery = row.querySelector('td:nth-child(7) .status-badge').textContent;
+                const date = row.querySelector('td:nth-child(8)').textContent;
+                
+                let show = true;
+                
+                if (search && !customerName.includes(search.toLowerCase())) {
+                    show = false;
+                }
+                if (paymentStatus && payment !== paymentStatus) {
+                    show = false;
+                }
+                if (deliveryStatus && delivery !== deliveryStatus) {
+                    show = false;
+                }
+                
+                row.style.display = show ? '' : 'none';
+            });
+        }
+        
+        function resetFilters() {
+            document.getElementById('search').value = '';
+            document.getElementById('paymentStatus').value = '';
+            document.getElementById('deliveryStatus').value = '';
+            document.getElementById('orderDate').value = '';
+            
+            const rows = document.querySelectorAll('.data-table tbody tr');
+            rows.forEach(row => row.style.display = '');
+        }
+        
+        // Export to Excel
+        function exportOrders() {
+            // Implement export functionality
+            alert('Export functionality will be implemented');
+        }
+        
+        // Edit Order
+        function editOrder(orderId) {
+            // Implement edit functionality
+            alert('Edit order ' + orderId);
+        }
+        
+        // Delete Order
+        function deleteOrder(orderId) {
+            if (confirm('Are you sure you want to delete this order?')) {
+                fetch(`/admin/api/order/${orderId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
