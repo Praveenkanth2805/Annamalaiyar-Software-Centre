@@ -229,9 +229,9 @@ def admin_login():
         admin = cur.fetchone()
         cur.close()
         
-        if admin and check_password(admin[2], password):
-            session['admin_id'] = admin[0]
-            session['admin_username'] = admin[1]
+        if admin and check_password(admin['password_hash'], password):
+            session['admin_id'] = admin['id']
+            session['admin_username'] = admin['username']
             session.permanent = True
             return redirect(url_for('admin_dashboard'))
         else:
@@ -251,19 +251,19 @@ def admin_dashboard():
     
     cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     
-    # Get statistics
-    cur.execute("SELECT COUNT(*) FROM orders")
-    total_orders = cur.fetchone()[0]
+    # Get statistics - use dictionary keys
+    cur.execute("SELECT COUNT(*) as count FROM orders")
+    total_orders = cur.fetchone()['count']
     
-    cur.execute("SELECT COUNT(*) FROM orders WHERE payment_status = 'Pending'")
-    pending_payments = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) as count FROM orders WHERE payment_status = 'Pending'")
+    pending_payments = cur.fetchone()['count']
     
-    cur.execute("SELECT COUNT(*) FROM orders WHERE delivery_status = 'Delivered'")
-    delivered_orders = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) as count FROM orders WHERE delivery_status = 'Delivered'")
+    delivered_orders = cur.fetchone()['count']
     
-    cur.execute("SELECT SUM(total_price) FROM orders WHERE payment_status = 'Paid'")
-    total_sales = cur.fetchone()[0] or 0
-    
+    cur.execute("SELECT SUM(total_price) as total FROM orders WHERE payment_status = 'Paid'")
+    total_sales_result = cur.fetchone()
+    total_sales = total_sales_result['total'] or 0 if total_sales_result else 0    
     # Recent orders with customer details
     cur.execute("""
         SELECT o.id, c.name, c.phone, o.total_price, o.payment_status, 
@@ -893,14 +893,22 @@ def admin_reports():
     
     cur.close()
     
+    # Use dictionary keys instead of tuple indices
+    total_orders = stats.get('total_orders', 0) or 0
+    total_sales = stats.get('total_sales', 0) or 0
+    avg_order_value = stats.get('avg_order_value', 0) or 0
+    paid_orders = stats.get('paid_orders', 0) or 0
+    
+    conversion_rate = (paid_orders / total_orders * 100) if total_orders > 0 else 0
+    
     return render_template('admin/reports.html',
                          report_type=report_type,
                          start_date=start_date,
                          end_date=end_date,
-                         total_orders=stats[0] or 0,
-                         total_sales=stats[1] or 0,
-                         avg_order_value=stats[2] or 0,
-                         conversion_rate=(stats[3] / stats[0] * 100) if stats[0] > 0 else 0,
+                         total_orders=total_orders,
+                         total_sales=total_sales,
+                         avg_order_value=avg_order_value,
+                         conversion_rate=conversion_rate,
                          daily_sales=daily_sales,
                          product_sales=product_sales,
                          course_sales=course_sales,
@@ -1205,7 +1213,6 @@ def send_delivery_notification(order_id):
     """
     
     return send_email(order['email'], f"Order Delivered - #{order_id}", html_content, plain_text)
-
 
 def send_new_order_notification(order_id):
     """Send email to admin when new order is placed"""

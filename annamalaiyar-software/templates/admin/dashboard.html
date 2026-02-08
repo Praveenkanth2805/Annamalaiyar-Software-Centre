@@ -19,24 +19,24 @@
             --gray-color: #9ca3af;
             --border-color: #e5e7eb;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Roboto', sans-serif;
             background-color: var(--light-color);
             color: var(--dark-color);
         }
-        
+
         .admin-container {
             display: flex;
             min-height: 100vh;
         }
-        
+
         .sidebar {
             width: 250px;
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
@@ -46,13 +46,13 @@
             height: 100vh;
             overflow-y: auto;
         }
-        
+
         .sidebar-header {
             padding: 0 20px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             margin-bottom: 20px;
         }
-        
+
         .sidebar-header h2 {
             display: flex;
             align-items: center;
@@ -60,35 +60,36 @@
             font-size: 1.2rem;
             font-weight: 500;
         }
-        
+
         .nav-menu {
             list-style: none;
         }
-        
+
         .nav-item {
             margin-bottom: 5px;
         }
-        
+
         .nav-link {
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 12px 20px;
-            color: rgba(255,255,255,0.8);
+            color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
             transition: all 0.3s;
         }
-        
+
         .nav-link:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             color: white;
         }
-        
+
         .nav-link.active {
-            background: rgba(255,255,255,0.15);
+            background: rgba(255, 255, 255, 0.15);
             color: white;
             border-left: 4px solid white;
         }
+
         /* Main Content */
         .main-content {
             flex: 1;
@@ -380,7 +381,7 @@
 <body>
     <div class="admin-container">
         <!-- Sidebar -->
-         {% include 'admin/sidebar.html' %}
+        {% include 'admin/sidebar.html' %}
         <!--aside class="sidebar">
             <div class="sidebar-header">
                 <h2>
@@ -445,7 +446,7 @@
         <!-- Main Content -->
         <main class="main-content">
             <!-- Topbar -->
-             {% include 'admin/topbar.html' %}
+            {% include 'admin/topbar.html' %}
             <!--header class="topbar">
                 <h1>Dashboard</h1>
                 <div class="user-info">
@@ -546,21 +547,21 @@
                             <tbody>
                                 {% for order in recent_orders %}
                                 <tr>
-                                    <td>#{{ order[0] }}</td>
-                                    <td>{{ order[1] }}</td>
-                                    <td>{{ order[2] }}</td>
-                                    <td>₹{{ order[3] }}</td>
+                                    <td>#{{ order.id }}</td>
+                                    <td>{{ order.name }}</td>
+                                    <td>{{ order.phone }}</td>
+                                    <td>₹{{ order.total_price }}</td>
                                     <td>
-                                        <span class="status-badge status-{{ order[4].lower() }}">
-                                            {{ order[4] }}
+                                        <span class="status-badge status-{{ order.payment_status.lower() }}">
+                                            {{ order.payment_status }}
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="status-badge status-{{ order[5].lower() }}">
-                                            {{ order[5] }}
+                                        <span class="status-badge status-{{ order.delivery_status.lower() }}">
+                                            {{ order.delivery_status }}
                                         </span>
                                     </td>
-                                    <td>{{ order[6].strftime('%d-%m-%Y') }}</td>
+                                    <td>{{ order.order_date.strftime('%d-%m-%Y') }}</td>
                                     <td>
                                         <a href="#" class="action-btn btn-view">
                                             <span class="material-icons">visibility</span>
