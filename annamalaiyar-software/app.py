@@ -61,13 +61,22 @@ def before_request():
         app.permanent_session_lifetime = timedelta(minutes=30)
         session.modified = True
 
+# Email Configuration
+EMAIL_CONFIG = {
+    'host': 'smtp.gmail.com',
+    'port': 587,
+    'username': 'your_email@gmail.com',  # Change this
+    'password': 'your_app_password',     # Change this (use app password for Gmail)
+    'admin_email': 'admin@yourdomain.com'  # Change this
+}
+
 # Customer Routes
 @app.route('/')
 def home():
     translations = load_translations(session.get('lang', 'en'))
     
     # Get featured products and courses
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     
     # Featured products
     cur.execute("SELECT * FROM products WHERE is_featured = TRUE ORDER BY created_at DESC LIMIT 6")
@@ -89,7 +98,7 @@ def home():
 def products():
     translations = load_translations(session.get('lang', 'en'))
     
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cur.execute("SELECT * FROM products ORDER BY name")
     products_list = cur.fetchall()
     cur.close()
@@ -103,7 +112,7 @@ def products():
 def courses():
     translations = load_translations(session.get('lang', 'en'))
     
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cur.execute("SELECT * FROM courses ORDER BY name")
     courses_list = cur.fetchall()
     cur.close()
@@ -128,7 +137,7 @@ def order():
         quantity = int(request.form.get('quantity', 1))
         
         # Calculate price
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         if item_type == 'product':
             cur.execute("SELECT price FROM products WHERE id = %s", (item_id,))
             result = cur.fetchone()
@@ -175,7 +184,7 @@ def order():
     if not item_type or not item_id:
         return redirect(url_for('home'))
     
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     if item_type == 'product':
         cur.execute("SELECT * FROM products WHERE id = %s", (item_id,))
         item = cur.fetchone()
@@ -215,7 +224,7 @@ def admin_login():
         username = request.form['username']
         password = request.form['password']
         
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("SELECT id, username, password_hash FROM admin WHERE username = %s", (username,))
         admin = cur.fetchone()
         cur.close()
@@ -240,7 +249,7 @@ def admin_dashboard():
     if not is_admin_logged_in():
         return redirect(url_for('admin_login'))
     
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     
     # Get statistics
     cur.execute("SELECT COUNT(*) FROM orders")
@@ -311,7 +320,7 @@ def api_product():
     if request.method == 'GET':
         # Get single product
         product_id = request.args.get('id')
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("SELECT * FROM products WHERE id = %s", (product_id,))
         product = cur.fetchone()
         cur.close()
@@ -348,7 +357,7 @@ def api_product():
                 image_path = filename
                 image.save(os.path.join('static/uploads', filename))
         
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("""
             INSERT INTO products (name, description, price, stock, image_path, is_featured)
             VALUES (%s, %s, %s, %s, %s, %s)
@@ -369,7 +378,7 @@ def api_product():
         stock = data.get('stock')
         is_featured = data.get('is_featured', False)
         
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("""
             UPDATE products 
             SET name = %s, description = %s, price = %s, stock = %s, is_featured = %s, updated_at = NOW()
@@ -384,7 +393,7 @@ def api_product():
         # Delete product
         product_id = request.args.get('id')
         
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("DELETE FROM products WHERE id = %s", (product_id,))
         mysql.connection.commit()
         cur.close()
@@ -412,7 +421,7 @@ def api_course():
     if request.method == 'GET':
         # Get single course
         course_id = request.args.get('id')
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("SELECT * FROM courses WHERE id = %s", (course_id,))
         course = cur.fetchone()
         cur.close()
@@ -450,7 +459,7 @@ def api_course():
                 image_path = filename
                 image.save(os.path.join('static/uploads', filename))
         
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("""
             INSERT INTO courses (name, description, duration, price, seats, image_path, is_featured)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -472,7 +481,7 @@ def api_course():
         seats = data.get('seats')
         is_featured = data.get('is_featured', False)
         
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("""
             UPDATE courses 
             SET name = %s, description = %s, duration = %s, price = %s, 
@@ -488,7 +497,7 @@ def api_course():
         # Delete course
         course_id = request.args.get('id')
         
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("DELETE FROM courses WHERE id = %s", (course_id,))
         mysql.connection.commit()
         cur.close()
@@ -508,7 +517,7 @@ def admin_orders():
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
     
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     
     # Build query with filters
     query = """
@@ -557,7 +566,7 @@ def api_order(order_id):
         return jsonify({'error': 'Unauthorized'}), 401
     
     if request.method == 'GET':
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("""
             SELECT o.*, c.name as customer_name, c.phone as customer_phone, 
                    c.email as customer_email, c.address as customer_address,
@@ -597,7 +606,7 @@ def api_order(order_id):
         data = request.get_json()
         
         if 'payment_status' in data:
-            cur = mysql.connection.cursor()
+            cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cur.execute("UPDATE orders SET payment_status = %s WHERE id = %s", 
                        (data['payment_status'], order_id))
             mysql.connection.commit()
@@ -610,7 +619,7 @@ def api_order(order_id):
             return jsonify({'success': True})
         
         elif 'delivery_status' in data:
-            cur = mysql.connection.cursor()
+            cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cur.execute("UPDATE orders SET delivery_status = %s WHERE id = %s", 
                        (data['delivery_status'], order_id))
             mysql.connection.commit()
@@ -623,7 +632,7 @@ def api_order(order_id):
             return jsonify({'success': True})
         
         elif 'remarks' in data:
-            cur = mysql.connection.cursor()
+            cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cur.execute("UPDATE orders SET remarks = %s WHERE id = %s", 
                        (data['remarks'], order_id))
             mysql.connection.commit()
@@ -631,7 +640,7 @@ def api_order(order_id):
             return jsonify({'success': True})
     
     elif request.method == 'DELETE':
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("DELETE FROM orders WHERE id = %s", (order_id,))
         mysql.connection.commit()
         cur.close()
@@ -646,7 +655,7 @@ def export_orders():
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
     
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     
     query = """
         SELECT o.id, o.order_date, c.name, c.phone, c.email,
@@ -701,42 +710,36 @@ def admin_customers():
     
     search = request.args.get('search', '')
     
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     
     if search:
         cur.execute("""
-            SELECT * FROM customers 
-            WHERE name LIKE %s OR phone LIKE %s OR email LIKE %s
-            ORDER BY created_at DESC
+            SELECT 
+                c.*,
+                COUNT(o.id) as order_count,
+                COALESCE(SUM(CASE WHEN o.payment_status = 'Paid' THEN o.total_price ELSE 0 END), 0) as total_spent
+            FROM customers c
+            LEFT JOIN orders o ON c.id = o.customer_id
+            WHERE c.name LIKE %s OR c.phone LIKE %s OR c.email LIKE %s
+            GROUP BY c.id
+            ORDER BY c.created_at DESC
         """, (f"%{search}%", f"%{search}%", f"%{search}%"))
     else:
-        cur.execute("SELECT * FROM customers ORDER BY created_at DESC")
+        cur.execute("""
+            SELECT 
+                c.*,
+                COUNT(o.id) as order_count,
+                COALESCE(SUM(CASE WHEN o.payment_status = 'Paid' THEN o.total_price ELSE 0 END), 0) as total_spent
+            FROM customers c
+            LEFT JOIN orders o ON c.id = o.customer_id
+            GROUP BY c.id
+            ORDER BY c.created_at DESC
+        """)
     
     customers = cur.fetchall()
-    
-    # Get order counts for each customer
-    customer_data = []
-    for customer in customers:
-        cur.execute("SELECT COUNT(*) FROM orders WHERE customer_id = %s", (customer[0],))
-        order_count = cur.fetchone()[0]
-        
-        cur.execute("SELECT SUM(total_price) FROM orders WHERE customer_id = %s AND payment_status = 'Paid'", (customer[0],))
-        total_spent = cur.fetchone()[0] or 0
-        
-        customer_data.append({
-            'id': customer[0],
-            'name': customer[1],
-            'phone': customer[2],
-            'email': customer[3],
-            'address': customer[4],
-            'created_at': customer[5],
-            'order_count': order_count,
-            'total_spent': total_spent
-        })
-    
     cur.close()
     
-    return render_template('admin/customers.html', customers=customer_data)
+    return render_template('admin/customers.html', customers=customers)
 
 @app.route('/admin/api/customer/<int:customer_id>', methods=['GET', 'PUT', 'DELETE'])
 def api_customer(customer_id):
@@ -744,7 +747,7 @@ def api_customer(customer_id):
         return jsonify({'error': 'Unauthorized'}), 401
     
     if request.method == 'GET':
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("SELECT * FROM customers WHERE id = %s", (customer_id,))
         customer = cur.fetchone()
         
@@ -791,7 +794,7 @@ def api_customer(customer_id):
         email = data.get('email')
         address = data.get('address')
         
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("""
             UPDATE customers 
             SET name = %s, phone = %s, email = %s, address = %s
@@ -803,7 +806,7 @@ def api_customer(customer_id):
         return jsonify({'success': True})
     
     elif request.method == 'DELETE':
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("DELETE FROM customers WHERE id = %s", (customer_id,))
         mysql.connection.commit()
         cur.close()
@@ -819,7 +822,7 @@ def admin_reports():
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
     
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     
     # Default date range (last 30 days)
     if not start_date:
@@ -918,7 +921,7 @@ def export_report():
     if not end_date:
         end_date = datetime.now().strftime('%Y-%m-%d')
     
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     
     if report_type == 'daily':
         cur.execute("""
@@ -991,7 +994,7 @@ def admin_backup():
     if not is_admin_logged_in():
         return redirect(url_for('admin_login'))
     
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cur.execute("SELECT * FROM backup_logs ORDER BY backup_date DESC LIMIT 20")
     backups = cur.fetchall()
     cur.close()
@@ -1031,7 +1034,7 @@ def create_backup():
             subprocess.run(dump_cmd, stdout=f, check=True)
         
         # Log backup in database
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("""
             INSERT INTO backup_logs (backup_type, file_path, status)
             VALUES (%s, %s, %s)
@@ -1048,7 +1051,7 @@ def create_backup():
         
     except Exception as e:
         # Log failed backup
-        cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cur.execute("""
             INSERT INTO backup_logs (backup_type, file_path, status)
             VALUES (%s, %s, %s)
@@ -1103,45 +1106,145 @@ def restore_backup():
 # ==================== HELPER FUNCTIONS ====================
 def send_payment_notification(order_id):
     """Send email notification when payment is received"""
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cur.execute("""
-        SELECT o.*, c.email, c.name
+        SELECT o.*, c.email, c.name as customer_name,
+               COALESCE(p.name, cs.name) as item_name
         FROM orders o
         JOIN customers c ON o.customer_id = c.id
+        LEFT JOIN products p ON o.product_id = p.id
+        LEFT JOIN courses cs ON o.course_id = cs.id
         WHERE o.id = %s
     """, (order_id,))
     order = cur.fetchone()
     cur.close()
     
-    if order and order[12]:  # customer email
-        # TODO: Implement email sending
-        print(f"Payment notification sent for order #{order_id} to {order[12]}")
-        return True
-    return False
+    if not order or not order['email']:
+        return False
+    
+    # Render HTML template
+    html_content = render_template('emails/customer_payment.html',
+        order_id=order_id,
+        customer_name=order['customer_name'],
+        item_name=order['item_name'],
+        total_price=order['total_price'],
+        current_year=datetime.now().year
+    )
+    
+    plain_text = f"""
+    Payment Received - Annamalaiyar Software Centre
+    
+    Dear {order['customer_name']},
+    
+    Thank you for your payment!
+    
+    We have successfully received your payment for Order #{order_id}.
+    
+    Payment Details:
+    - Order ID: #{order_id}
+    - Item: {order['item_name']}
+    - Amount Paid: ₹{order['total_price']}
+    - Payment Status: Paid
+    
+    Your order is now being processed. You will receive another notification when your order is delivered.
+    
+    If you have any questions, please contact our support team.
+    
+    Thank you for choosing Annamalaiyar Software Centre!
+    """
+    
+    return send_email(order['email'], f"Payment Received - Order #{order_id}", html_content, plain_text)
 
 def send_delivery_notification(order_id):
     """Send email notification when order is delivered"""
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cur.execute("""
-        SELECT o.*, c.email, c.name
+        SELECT o.*, c.email, c.name as customer_name,
+               COALESCE(p.name, cs.name) as item_name
         FROM orders o
         JOIN customers c ON o.customer_id = c.id
+        LEFT JOIN products p ON o.product_id = p.id
+        LEFT JOIN courses cs ON o.course_id = cs.id
         WHERE o.id = %s
     """, (order_id,))
     order = cur.fetchone()
     cur.close()
     
-    if order and order[12]:  # customer email
-        # TODO: Implement email sending
-        print(f"Delivery notification sent for order #{order_id} to {order[12]}")
-        return True
-    return False
+    if not order or not order['email']:
+        return False
+    
+    # Render HTML template
+    html_content = render_template('emails/customer_delivery.html',
+        order_id=order_id,
+        customer_name=order['customer_name'],
+        item_name=order['item_name'],
+        delivery_date=datetime.now().strftime('%d-%m-%Y'),
+        current_year=datetime.now().year
+    )
+    
+    plain_text = f"""
+    Order Delivered - Annamalaiyar Software Centre
+    
+    Dear {order['customer_name']},
+    
+    Great news! Your order has been delivered.
+    
+    We're happy to inform you that your order #{order_id} has been successfully delivered.
+    
+    Delivery Details:
+    - Order ID: #{order_id}
+    - Item: {order['item_name']}
+    - Delivery Status: Delivered
+    - Delivery Date: {datetime.now().strftime('%d-%m-%Y')}
+    
+    We hope you enjoy your purchase! If you have any issues or need support with your {order['item_name']}, please don't hesitate to contact us.
+    
+    Thank you for shopping with Annamalaiyar Software Centre. We look forward to serving you again!
+    
+    Need help? Contact our support team for any assistance.
+    """
+    
+    return send_email(order['email'], f"Order Delivered - #{order_id}", html_content, plain_text)
+
 
 def send_new_order_notification(order_id):
     """Send email to admin when new order is placed"""
-    # TODO: Implement admin notification
-    print(f"New order notification: Order #{order_id}")
-    return True
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cur.execute("""
+        SELECT o.*, c.name as customer_name, c.phone, c.email, c.address,
+               COALESCE(p.name, cs.name) as item_name,
+               CASE WHEN o.product_id IS NOT NULL THEN 'Product' ELSE 'Course' END as item_type
+        FROM orders o
+        JOIN customers c ON o.customer_id = c.id
+        LEFT JOIN products p ON o.product_id = p.id
+        LEFT JOIN courses cs ON o.course_id = cs.id
+        WHERE o.id = %s
+    """, (order_id,))
+    order = cur.fetchone()
+    cur.close()
+    
+    if not order:
+        return False
+    
+    # Render HTML template
+    html_content = render_template('emails/admin_new_order.html',
+        order_id=order_id,
+        customer_name=order['customer_name'],
+        phone=order['phone'],
+        email=order['email'],
+        address=order['address'],
+        item_type=order['item_type'],
+        item_name=order['item_name'],
+        quantity=order['quantity'],
+        total_price=order['total_price'],
+        order_date=order['order_date'].strftime('%d-%m-%Y %H:%M:%S'),
+        admin_url='http://localhost:5000/admin/orders',
+        current_year=datetime.now().year
+    )
+    
+    plain_text = f"""New Order Received - #{order_id}..."""  # Keep your plain text version
+    
+    return send_email(EMAIL_CONFIG['admin_email'], f"New Order #{order_id}", html_content, plain_text)
 
 # ==================== AUTO-BACKUP SCHEDULER ====================
 def schedule_auto_backup():
@@ -1174,7 +1277,7 @@ def schedule_backup():
     data = request.get_json()
     
     # Store schedule in database or config file
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     # Implement schedule storage logic here
     
     return jsonify({'success': True, 'message': 'Backup schedule saved'})

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .content { background: #f9f9f9; padding: 20px; border-radius: 0 0 5px 5px; }
+        .order-details { background: white; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .detail-row { display: flex; margin-bottom: 10px; }
+        .detail-label { font-weight: bold; min-width: 150px; color: #666; }
+        .footer { text-align: center; margin-top: 20px; color: #888; font-size: 12px; }
+        .btn { display: inline-block; background: #667eea; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 New Order Received</h1>
+        </div>
+        <div class="content">
+            <p>Hello Admin,</p>
+            <p>A new order has been placed on Annamalaiyar Software Centre.</p>
+            
+            <div class="order-details">
+                <h3>Order Details</h3>
+                <div class="detail-row">
+                    <div class="detail-label">Order ID:</div>
+                    <div class="detail-value"><strong>#{{ order_id }}</strong></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Customer Name:</div>
+                    <div class="detail-value">{{ customer_name }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Phone:</div>
+                    <div class="detail-value">{{ phone }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Email:</div>
+                    <div class="detail-value">{{ email or 'Not provided' }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Address:</div>
+                    <div class="detail-value">{{ address }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Item Type:</div>
+                    <div class="detail-value">{{ item_type }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Item Name:</div>
+                    <div class="detail-value">{{ item_name }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Quantity:</div>
+                    <div class="detail-value">{{ quantity }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Total Amount:</div>
+                    <div class="detail-value">₹{{ total_price }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Order Date:</div>
+                    <div class="detail-value">{{ order_date }}</div>
+                </div>
+            </div>
+            
+            <p>
+                <a href="{{ admin_url }}" class="btn">View Order in Admin Panel</a>
+            </p>
+            
+            <p>Please process this order as soon as possible.</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated notification from Annamalaiyar Software Centre.</p>
+            <p>© {{ current_year }} Annamalaiyar Software Centre. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

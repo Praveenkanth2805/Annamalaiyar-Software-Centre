@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #10b981 0%, #047857 100%); color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .content { background: #f9f9f9; padding: 20px; border-radius: 0 0 5px 5px; }
+        .thank-you { font-size: 18px; color: #047857; font-weight: bold; text-align: center; margin: 20px 0; }
+        .footer { text-align: center; margin-top: 20px; color: #888; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Payment Successful</h1>
+        </div>
+        <div class="content">
+            <p>Dear {{ customer_name }},</p>
+            
+            <div class="thank-you">
+                Thank you for your payment!
+            </div>
+            
+            <p>We have successfully received your payment for Order <strong>#{{ order_id }}</strong>.</p>
+            
+            <p><strong>Payment Details:</strong></p>
+            <ul>
+                <li>Order ID: #{{ order_id }}</li>
+                <li>Item: {{ item_name }}</li>
+                <li>Amount Paid: ₹{{ total_price }}</li>
+                <li>Payment Status: Paid ✅</li>
+            </ul>
+            
+            <p>Your order is now being processed. You will receive another notification when your order is delivered.</p>
+            
+            <p>If you have any questions, please contact our support team.</p>
+            
+            <p>Thank you for choosing Annamalaiyar Software Centre!</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated payment confirmation email.</p>
+            <p>© {{ current_year }} Annamalaiyar Software Centre. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
