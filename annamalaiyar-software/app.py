@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
-from flask_mysqldb import MySQL
+from flask_mysqldb import MySQL 
+import MySQLdb
 from datetime import datetime, timedelta
 import bcrypt
 import os
@@ -294,7 +295,7 @@ def admin_products():
     if not is_admin_logged_in():
         return redirect(url_for('admin_login'))
     
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cur.execute("SELECT * FROM products ORDER BY created_at DESC")
     products = cur.fetchall()
     cur.close()
@@ -395,7 +396,7 @@ def admin_courses():
     if not is_admin_logged_in():
         return redirect(url_for('admin_login'))
     
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cur.execute("SELECT * FROM courses ORDER BY created_at DESC")
     courses = cur.fetchall()
     cur.close()
