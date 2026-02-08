@@ -159,6 +159,7 @@ def order():
                 VALUES (%s, %s, %s, %s)
             """, (customer_id, item_id, quantity, total_price))
         
+        order_id = cur.lastrowid
         mysql.connection.commit()
         cur.close()
         send_new_order_notification(order_id)
