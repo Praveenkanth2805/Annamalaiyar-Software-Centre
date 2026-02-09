@@ -9,6 +9,7 @@ import json
 from werkzeug.utils import secure_filename
 import pandas as pd
 from io import BytesIO
+from flask import send_file  # Add this to your existing imports
 
 # Load environment variables
 load_dotenv()
@@ -70,6 +71,18 @@ EMAIL_CONFIG = {
     'admin_email': 'admin@yourdomain.com'  # Change this
 }
 
+def send_email(to_email, subject, html_content, plain_text):
+    """Send email using SMTP configuration"""
+    try:
+        # For now, just print the email details
+        print(f"📧 Email would be sent to: {to_email}")
+        print(f"📋 Subject: {subject}")
+        print(f"📄 Plain text preview: {plain_text[:100]}...")
+        return True
+    except Exception as e:
+        print(f"❌ Error sending email: {e}")
+        return False
+    
 # Customer Routes
 @app.route('/')
 def home():
@@ -141,11 +154,11 @@ def order():
         if item_type == 'product':
             cur.execute("SELECT price FROM products WHERE id = %s", (item_id,))
             result = cur.fetchone()
-            price = result[0] if result else 0
+            price = result['price'] if result else 0  # Changed from result[0]
         else:
             cur.execute("SELECT price FROM courses WHERE id = %s", (item_id,))
             result = cur.fetchone()
-            price = result[0] if result else 0
+            price = result['price'] if result else 0  # Changed from result[0]
         
         total_price = price * quantity
         

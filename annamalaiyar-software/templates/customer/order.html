@@ -8,8 +8,8 @@
             <div class="summary-card">
                 {% if item_type == 'product' %}
                 <div class="item-image">
-                    {% if item[5] %}
-                        <img src="{{ url_for('static', filename='uploads/' + item[5]) }}" alt="{{ item[1] }}">
+                    {% if item.image or item.image_url %}
+                        <img src="{{ url_for('static', filename='uploads/' + (item.image or item.image_url)) }}" alt="{{ item.name or item.title }}">
                     {% else %}
                         <div class="placeholder-image">
                             <span class="material-icons">image</span>
@@ -17,23 +17,23 @@
                     {% endif %}
                 </div>
                 <div class="item-details">
-                    <h3>{{ item[1] }}</h3>
-                    <p>{{ item[2] }}</p>
+                    <h3>{{ item.name or item.title }}</h3>
+                    <p>{{ item.description or '' }}</p>
                     <div class="item-price">
                         <span>{{ translations.price }}:</span>
-                        <strong>₹{{ item[3] }}</strong>
+                        <strong>₹{{ item.price }}</strong>
                     </div>
-                    {% if item[4] <= 5 and item[4] > 0 %}
+                    {% if (item.stock_quantity or item.quantity or 0) <= 5 and (item.stock_quantity or item.quantity or 0) > 0 %}
                     <div class="stock-warning">
                         <span class="material-icons">warning</span>
-                        Only {{ item[4] }} {{ translations.left_in_stock }}
+                        Only {{ item.stock_quantity or item.quantity }} {{ translations.left_in_stock }}
                     </div>
                     {% endif %}
                 </div>
                 {% else %}
                 <div class="item-image">
-                    {% if item[6] %}
-                        <img src="{{ url_for('static', filename='uploads/' + item[6]) }}" alt="{{ item[1] }}">
+                    {% if item.image or item.image_url %}
+                        <img src="{{ url_for('static', filename='uploads/' + (item.image or item.image_url)) }}" alt="{{ item.name or item.title }}">
                     {% else %}
                         <div class="placeholder-image">
                             <span class="material-icons">school</span>
@@ -41,21 +41,21 @@
                     {% endif %}
                 </div>
                 <div class="item-details">
-                    <h3>{{ item[1] }}</h3>
-                    <p>{{ item[2] }}</p>
+                    <h3>{{ item.name or item.title }}</h3>
+                    <p>{{ item.description or '' }}</p>
                     <div class="item-meta">
                         <span class="duration">
                             <span class="material-icons">schedule</span>
-                            {{ item[3] }}
+                            {{ item.duration or item.duration_hours }}
                         </span>
                         <span class="seats">
                             <span class="material-icons">people</span>
-                            {{ item[5] }} {{ translations.seats_available }}
+                            {{ item.available_seats or item.seats or item.max_seats }} {{ translations.seats_available }}
                         </span>
                     </div>
                     <div class="item-price">
                         <span>{{ translations.price }}:</span>
-                        <strong>₹{{ item[4] }}</strong>
+                        <strong>₹{{ item.price or item.fee }}</strong>
                     </div>
                 </div>
                 {% endif %}
@@ -109,14 +109,14 @@
                         <span class="material-icons">format_list_numbered</span>
                         {{ translations.quantity }} *
                     </label>
-                    <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ item[4] }}" required>
+                    <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ item.stock_quantity or item.quantity }}" required>
                 </div>
                 {% endif %}
                 
                 <div class="price-calculation">
                     <div class="price-row">
                         <span>{{ translations.item_price }}:</span>
-                        <span id="unitPrice">₹{{ item[3] if item_type == 'product' else item[4] }}</span>
+                        <span id="unitPrice">₹{{ item.price if item_type == 'product' else (item.price or item.fee) }}</span>
                     </div>
                     {% if item_type == 'product' %}
                     <div class="price-row">
@@ -126,7 +126,7 @@
                     {% endif %}
                     <div class="price-row total">
                         <span>{{ translations.total_price }}:</span>
-                        <span id="totalPrice">₹{{ item[3] if item_type == 'product' else item[4] }}</span>
+                        <span id="totalPrice">₹{{ item.price if item_type == 'product' else (item.price or item.fee) }}</span>
                     </div>
                 </div>
                 
@@ -150,8 +150,8 @@
 <script>
     {% if item_type == 'product' %}
     // Live price calculation for products
-    const unitPrice = {{ item[3] }};
-    const maxStock = {{ item[4] }};
+    const unitPrice = {{ item.price }};
+    const maxStock = {{ item.stock_quantity or item.quantity or 0 }};
     
     function updatePrice() {
         const quantity = parseInt(document.getElementById('quantity').value) || 1;

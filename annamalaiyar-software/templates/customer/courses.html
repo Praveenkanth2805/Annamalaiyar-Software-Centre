@@ -18,19 +18,19 @@
         {% for course in courses %}
         <div class="course-card">
             <div class="course-image">
-                {% if course[6] %}
-                    <img src="{{ url_for('static', filename='uploads/' + course[6]) }}" alt="{{ course[1] }}">
+                {% if course.image or course.image_url %}
+                    <img src="{{ url_for('static', filename='uploads/' + (course.image or course.image_url)) }}" alt="{{ course.name or course.title }}">
                 {% else %}
                     <div class="placeholder-image">
                         <span class="material-icons">school</span>
                     </div>
                 {% endif %}
-                {% if course[5] <= 5 and course[5] > 0 %}
+                {% if (course.available_seats or course.seats or course.max_seats or 0) <= 5 and (course.available_seats or course.seats or course.max_seats or 0) > 0 %}
                 <div class="seat-badge">
                     <span class="material-icons">warning</span>
-                    {{ course[5] }} {{ translations.seats_left }}
+                    {{ course.available_seats or course.seats or course.max_seats }} {{ translations.seats_left }}
                 </div>
-                {% elif course[5] == 0 %}
+                {% elif (course.available_seats or course.seats or course.max_seats or 0) == 0 %}
                 <div class="seat-badge full">
                     <span class="material-icons">block</span>
                     {{ translations.full }}
@@ -38,22 +38,22 @@
                 {% endif %}
             </div>
             <div class="course-info">
-                <h3>{{ course[1] }}</h3>
-                <p class="course-description">{{ course[2] }}</p>
+                <h3>{{ course.name or course.title }}</h3>
+                <p class="course-description">{{ course.description or '' }}</p>
                 <div class="course-meta">
                     <span class="duration">
                         <span class="material-icons">schedule</span>
-                        {{ course[3] }}
+                        {{ course.duration or course.duration_hours }}
                     </span>
                     <span class="seats">
                         <span class="material-icons">people</span>
-                        {{ course[5] }} {{ translations.seats_available }}
+                        {{ course.available_seats or course.seats or course.max_seats }} {{ translations.seats_available }}
                     </span>
                 </div>
-                <div class="course-price">₹{{ course[4] }}</div>
+                <div class="course-price">₹{{ course.price or course.fee }}</div>
                 <div class="course-actions">
-                    {% if course[5] > 0 %}
-                    <a href="{{ url_for('order', type='course', id=course[0]) }}" class="btn btn-primary">
+                    {% if (course.available_seats or course.seats or course.max_seats or 0) > 0 %}
+                    <a href="{{ url_for('order', type='course', id=course.id or course.course_id) }}" class="btn btn-primary">
                         <span class="material-icons">book</span>
                         {{ translations.enroll_now }}
                     </a>

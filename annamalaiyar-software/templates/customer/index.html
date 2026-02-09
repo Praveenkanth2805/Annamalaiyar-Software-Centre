@@ -32,8 +32,8 @@
             {% for product in featured_products %}
             <div class="product-card">
                 <div class="product-image">
-                    {% if product[5] %}
-                        <img src="{{ url_for('static', filename='uploads/' + product[5]) }}" alt="{{ product[1] }}">
+                    {% if product.image or product.image_url %}
+                        <img src="{{ url_for('static', filename='uploads/' + (product.image or product.image_url)) }}" alt="{{ product.name or product.title }}">
                     {% else %}
                         <div class="placeholder-image">
                             <span class="material-icons">image</span>
@@ -41,11 +41,11 @@
                     {% endif %}
                 </div>
                 <div class="product-info">
-                    <h3>{{ product[1] }}</h3>
-                    <p class="product-description">{{ product[2][:100] }}{% if product[2]|length > 100 %}...{% endif %}</p>
-                    <div class="product-price">₹{{ product[3] }}</div>
+                    <h3>{{ product.name or product.title }}</h3>
+                    <p class="product-description">{{ product.description[:100] if product.description else '' }}{% if product.description and product.description|length > 100 %}...{% endif %}</p>
+                    <div class="product-price">₹{{ product.price }}</div>
                     <div class="product-actions">
-                        <a href="{{ url_for('order', type='product', id=product[0]) }}" class="btn btn-small btn-primary">
+                        <a href="{{ url_for('order', type='product', id=product.id or product.product_id) }}" class="btn btn-small btn-primary">
                             <span class="material-icons">add_shopping_cart</span>
                             {{ translations.order_now }}
                         </a>
@@ -69,8 +69,8 @@
             {% for course in featured_courses %}
             <div class="course-card">
                 <div class="course-image">
-                    {% if course[6] %}
-                        <img src="{{ url_for('static', filename='uploads/' + course[6]) }}" alt="{{ course[1] }}">
+                    {% if course.image or course.image_url %}
+                        <img src="{{ url_for('static', filename='uploads/' + (course.image or course.image_url)) }}" alt="{{ course.name or course.title }}">
                     {% else %}
                         <div class="placeholder-image">
                             <span class="material-icons">school</span>
@@ -78,21 +78,21 @@
                     {% endif %}
                 </div>
                 <div class="course-info">
-                    <h3>{{ course[1] }}</h3>
-                    <p class="course-description">{{ course[2][:100] }}{% if course[2]|length > 100 %}...{% endif %}</p>
+                    <h3>{{ course.name or course.title }}</h3>
+                    <p class="course-description">{{ course.description[:100] if course.description else '' }}{% if course.description and course.description|length > 100 %}...{% endif %}</p>
                     <div class="course-details">
                         <span class="duration">
                             <span class="material-icons">schedule</span>
-                            {{ course[3] }}
+                            {{ course.duration or course.duration_hours }}
                         </span>
                         <span class="seats">
                             <span class="material-icons">people</span>
-                            {{ course[5] }} {{ translations.seats }}
+                            {{ course.available_seats or course.seats or course.max_seats }} {{ translations.seats }}
                         </span>
                     </div>
-                    <div class="course-price">₹{{ course[4] }}</div>
+                    <div class="course-price">₹{{ course.price or course.fee }}</div>
                     <div class="course-actions">
-                        <a href="{{ url_for('order', type='course', id=course[0]) }}" class="btn btn-small btn-primary">
+                        <a href="{{ url_for('order', type='course', id=course.id or course.course_id) }}" class="btn btn-small btn-primary">
                             <span class="material-icons">book</span>
                             {{ translations.enroll_now }}
                         </a>
