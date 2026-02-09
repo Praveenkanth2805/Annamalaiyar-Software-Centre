@@ -64,12 +64,13 @@ def before_request():
 
 # Email Configuration
 EMAIL_CONFIG = {
-    'host': 'smtp.gmail.com',
-    'port': 587,
-    'username': 'your_email@gmail.com',  # Change this
-    'password': 'your_app_password',     # Change this (use app password for Gmail)
-    'admin_email': 'admin@yourdomain.com'  # Change this
+    'host': os.getenv('EMAIL_HOST'),
+    'port': int(os.getenv('EMAIL_PORT')),
+    'username': os.getenv('EMAIL_USERNAME'),
+    'password': os.getenv('EMAIL_PASSWORD'),
+    'admin_email': os.getenv('ADMIN_EMAIL')
 }
+
 
 def send_email(to_email, subject, html_content, plain_text):
     """Send email using SMTP configuration"""
