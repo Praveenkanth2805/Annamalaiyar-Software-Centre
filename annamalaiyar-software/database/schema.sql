@@ -85,3 +85,5 @@ CREATE TABLE email_templates (
 -- Insert default admin (password: admin123)
 INSERT INTO admin (username, password_hash) 
 VALUES ('admin', '$2b$12$QmzJtj8lB77EJCqAcxq.GeO3samdrT1VLBEVVm1d4b9EMtPkdvXoa');
+
+ALTER TABLE orders ADD COLUMN payment_method VARCHAR(50) DEFAULT 'Cash';

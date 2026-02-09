@@ -535,19 +535,19 @@ def admin_orders():
     
     # Build query with filters
     query = """
-        SELECT o.*, 
-               c.name as customer_name, 
-               c.phone as customer_phone, 
-               c.email as customer_email, 
-               c.address as customer_address,
-               p.name as product_name, 
-               cs.name as course_name
-        FROM orders o
-        JOIN customers c ON o.customer_id = c.id
-        LEFT JOIN products p ON o.product_id = p.id
-        LEFT JOIN courses cs ON o.course_id = cs.id
-        WHERE 1=1
-    """
+    SELECT o.*, 
+           c.name as customer_name, 
+           c.phone as customer_phone, 
+           c.email as customer_email, 
+           c.address as customer_address,
+           p.name as product_name, 
+           cs.name as course_name
+    FROM orders o
+    JOIN customers c ON o.customer_id = c.id
+    LEFT JOIN products p ON o.product_id = p.id
+    LEFT JOIN courses cs ON o.course_id = cs.id
+    WHERE 1=1
+"""
     params = []
     
     if search:
@@ -614,6 +614,7 @@ def api_order(order_id):
                 'total_price': float(order['total_price']),
                 'payment_status': order['payment_status'],
                 'delivery_status': order['delivery_status'],
+                'payment_method': order.get('payment_method', 'Cash'),  # Add this
                 'order_date': order['order_date'].strftime('%Y-%m-%d %H:%M:%S') if order.get('order_date') else None,
                 'remarks': order.get('remarks'),
                 'customer_name': order['customer_name'],
@@ -626,42 +627,46 @@ def api_order(order_id):
         return jsonify({'error': 'Order not found'}), 404
     
     elif request.method == 'PUT':
-        # Update order
+        # Update order - handle multiple fields at once
         data = request.get_json()
         
-        if 'payment_status' in data:
-            cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cur.execute("UPDATE orders SET payment_status = %s WHERE id = %s", 
-                       (data['payment_status'], order_id))
-            mysql.connection.commit()
-            cur.close()
-            
-            # Send notification if payment status changed to Paid
-            if data['payment_status'] == 'Paid':
-                send_payment_notification(order_id)
-            
-            return jsonify({'success': True})
+        updates = []
+        params = []
         
-        elif 'delivery_status' in data:
+        if 'payment_status' in data:
+            updates.append("payment_status = %s")
+            params.append(data['payment_status'])
+        
+        if 'delivery_status' in data:
+            updates.append("delivery_status = %s")
+            params.append(data['delivery_status'])
+        
+        if 'payment_method' in data:  # Add this for payment method
+            updates.append("payment_method = %s")
+            params.append(data['payment_method'])
+        
+        if 'remarks' in data:
+            updates.append("remarks = %s")
+            params.append(data['remarks'])
+        
+        if updates:
+            query = f"UPDATE orders SET {', '.join(updates)} WHERE id = %s"
+            params.append(order_id)
+            
             cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cur.execute("UPDATE orders SET delivery_status = %s WHERE id = %s", 
-                       (data['delivery_status'], order_id))
+            cur.execute(query, params)
             mysql.connection.commit()
             cur.close()
             
-            # Send notification if delivery status changed to Delivered
-            if data['delivery_status'] == 'Delivered':
+            # Send notifications if status changed
+            if 'payment_status' in data and data['payment_status'] == 'Paid':
+                send_payment_notification(order_id)
+            if 'delivery_status' in data and data['delivery_status'] == 'Delivered':
                 send_delivery_notification(order_id)
             
             return jsonify({'success': True})
         
-        elif 'remarks' in data:
-            cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cur.execute("UPDATE orders SET remarks = %s WHERE id = %s", 
-                       (data['remarks'], order_id))
-            mysql.connection.commit()
-            cur.close()
-            return jsonify({'success': True})
+        return jsonify({'error': 'No updates provided'}), 400
     
     elif request.method == 'DELETE':
         cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -669,7 +674,7 @@ def api_order(order_id):
         mysql.connection.commit()
         cur.close()
         return jsonify({'success': True})
-
+    
 @app.route('/admin/api/orders/export')
 def export_orders():
     if not is_admin_logged_in():
