@@ -683,13 +683,30 @@ def export_orders():
     # Get filter parameters
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
+    search = request.args.get('search', '')
+    payment_status = request.args.get('payment_status', '')
+    delivery_status = request.args.get('delivery_status', '')
     
     cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     
     query = """
-        SELECT o.id, o.order_date, c.name, c.phone, c.email,
-               COALESCE(p.name, cs.name) as item_name,
-               o.quantity, o.total_price, o.payment_status, o.delivery_status
+        SELECT 
+            o.id as 'Order ID',
+            DATE(o.order_date) as 'Order Date',
+            c.name as 'Customer Name',
+            c.phone as 'Phone',
+            c.email as 'Email',
+            COALESCE(p.name, cs.name) as 'Item Name',
+            CASE 
+                WHEN o.product_id IS NOT NULL THEN 'Product'
+                ELSE 'Course'
+            END as 'Item Type',
+            o.quantity as 'Quantity',
+            o.total_price as 'Total Price',
+            o.payment_status as 'Payment Status',
+            o.delivery_status as 'Delivery Status',
+            COALESCE(o.payment_method, 'Cash') as 'Payment Method',
+            o.remarks as 'Remarks'
         FROM orders o
         JOIN customers c ON o.customer_id = c.id
         LEFT JOIN products p ON o.product_id = p.id
@@ -697,6 +714,18 @@ def export_orders():
         WHERE 1=1
     """
     params = []
+    
+    if search:
+        query += " AND (c.name LIKE %s OR c.phone LIKE %s OR c.email LIKE %s)"
+        params.extend([f"%{search}%", f"%{search}%", f"%{search}%"])
+    
+    if payment_status:
+        query += " AND o.payment_status = %s"
+        params.append(payment_status)
+    
+    if delivery_status:
+        query += " AND o.delivery_status = %s"
+        params.append(delivery_status)
     
     if start_date:
         query += " AND DATE(o.order_date) >= %s"
@@ -706,20 +735,49 @@ def export_orders():
         query += " AND DATE(o.order_date) <= %s"
         params.append(end_date)
     
+    query += " ORDER BY o.order_date DESC"
+    
     cur.execute(query, params)
     orders = cur.fetchall()
     cur.close()
     
-    # Create DataFrame
-    df = pd.DataFrame(orders, columns=[
-        'Order ID', 'Order Date', 'Customer Name', 'Phone', 'Email',
-        'Item Name', 'Quantity', 'Total Price', 'Payment Status', 'Delivery Status'
-    ])
+    if not orders:
+        # Create empty DataFrame with correct columns
+        df = pd.DataFrame(columns=[
+            'Order ID', 'Order Date', 'Customer Name', 'Phone', 'Email',
+            'Item Name', 'Item Type', 'Quantity', 'Total Price', 
+            'Payment Status', 'Delivery Status', 'Payment Method', 'Remarks'
+        ])
+    else:
+        # Create DataFrame directly from the dictionary results
+        df = pd.DataFrame(orders)
+    
+    # Format the date column
+    if 'Order Date' in df.columns and not df.empty:
+        df['Order Date'] = pd.to_datetime(df['Order Date']).dt.strftime('%d-%m-%Y')
+    
+    # Format currency column
+    if 'Total Price' in df.columns and not df.empty:
+        df['Total Price'] = df['Total Price'].apply(lambda x: f"₹{float(x):.2f}" if x else "₹0.00")
     
     # Create Excel file in memory
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, sheet_name='Orders', index=False)
+        
+        # Auto-adjust column widths
+        worksheet = writer.sheets['Orders']
+        for column in worksheet.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 30)
+            worksheet.column_dimensions[column_letter].width = adjusted_width
     
     output.seek(0)
     
@@ -728,7 +786,7 @@ def export_orders():
         output,
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         as_attachment=True,
-        download_name=f'orders_export_{datetime.now().strftime("%Y%m%d")}.xlsx'
+        download_name=f'orders_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
     )
 
 # ==================== CUSTOMER MANAGEMENT ====================

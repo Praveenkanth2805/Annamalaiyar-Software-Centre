@@ -1232,22 +1232,59 @@
         }
 
         // Export to Excel
-        function exportOrders() {
-            const search = document.getElementById('search').value;
-            const paymentStatus = document.getElementById('paymentStatus').value;
-            const deliveryStatus = document.getElementById('deliveryStatus').value;
-            const orderDate = document.getElementById('orderDate').value;
+function exportOrders() {
+    const search = document.getElementById('search').value;
+    const paymentStatus = document.getElementById('paymentStatus').value;
+    const deliveryStatus = document.getElementById('deliveryStatus').value;
+    const orderDate = document.getElementById('orderDate').value;
 
-            let url = '/admin/api/orders/export?';
-            const params = new URLSearchParams();
-
-            if (search) params.append('search', search);
-            if (paymentStatus) params.append('payment_status', paymentStatus);
-            if (deliveryStatus) params.append('delivery_status', deliveryStatus);
-            if (orderDate) params.append('start_date', orderDate);
-
-            window.open(url + params.toString(), '_blank');
-        }
+    let url = '/admin/api/orders/export?';
+    const params = new URLSearchParams();
+    
+    if (search) params.append('search', search);
+    if (paymentStatus) params.append('payment_status', paymentStatus);
+    if (deliveryStatus) params.append('delivery_status', deliveryStatus);
+    if (orderDate) {
+        params.append('start_date', orderDate);
+        params.append('end_date', orderDate);
+    }
+    
+    // Show loading indicator
+    const exportBtn = event.target;
+    const originalText = exportBtn.innerHTML;
+    exportBtn.innerHTML = '<span class="material-icons">hourglass_empty</span> Exporting...';
+    exportBtn.disabled = true;
+    
+    fetch(url + params.toString())
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            }
+            throw new Error('Export failed');
+        })
+        .then(blob => {
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `orders_export_${new Date().toISOString().slice(0,10)}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            showToast('Excel file downloaded successfully!');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to export orders. Please try again.');
+        })
+        .finally(() => {
+            // Reset button
+            exportBtn.innerHTML = originalText;
+            exportBtn.disabled = false;
+        });
+}
 
         // Edit Order
         function editOrder(orderId) {
