@@ -608,27 +608,32 @@
                     <div class="filter-row">
                         <div class="filter-group">
                             <label for="search">Search Orders</label>
-                            <input type="text" id="search" placeholder="Search by customer name, phone...">
+                            <input type="text" id="search" placeholder="Search by customer name, phone..."
+                                value="{{ request.args.get('search', '') }}">
                         </div>
                         <div class="filter-group">
                             <label for="paymentStatus">Payment Status</label>
                             <select id="paymentStatus">
                                 <option value="">All</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Paid">Paid</option>
+                                <option value="Pending" {% if request.args.get('payment_status')=='Pending' %}selected{%
+                                    endif %}>Pending</option>
+                                <option value="Paid" {% if request.args.get('payment_status')=='Paid' %}selected{% endif
+                                    %}>Paid</option>
                             </select>
                         </div>
                         <div class="filter-group">
                             <label for="deliveryStatus">Delivery Status</label>
                             <select id="deliveryStatus">
                                 <option value="">All</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Delivered">Delivered</option>
+                                <option value="Pending" {% if request.args.get('delivery_status')=='Pending'
+                                    %}selected{% endif %}>Pending</option>
+                                <option value="Delivered" {% if request.args.get('delivery_status')=='Delivered'
+                                    %}selected{% endif %}>Delivered</option>
                             </select>
                         </div>
                         <div class="filter-group">
                             <label for="orderDate">Order Date</label>
-                            <input type="date" id="orderDate">
+                            <input type="date" id="orderDate" value="{{ request.args.get('start_date', '') }}">
                         </div>
                     </div>
                     <div class="filter-actions">
@@ -756,77 +761,87 @@
         // View Order Details
         function viewOrderDetails(orderId) {
             fetch(`/admin/api/order/${orderId}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(order => {
-                    document.getElementById('orderId').textContent = order.id;
+                    console.log('Order data:', order); // Debug log
+                    document.getElementById('orderId').textContent = order.id || orderId;
 
                     let content = `
-                        <div class="order-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Customer Name:</div>
-                                <div class="detail-value">${order.customer_name}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Phone:</div>
-                                <div class="detail-value">${order.customer_phone}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Email:</div>
-                                <div class="detail-value">${order.customer_email || 'N/A'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Address:</div>
-                                <div class="detail-value">${order.customer_address}</div>
-                            </div>
-                            <hr>
-                            <div class="detail-row">
-                                <div class="detail-label">Item Type:</div>
-                                <div class="detail-value">${order.product_id ? 'Product' : 'Course'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Item Name:</div>
-                                <div class="detail-value">${order.product_name || order.course_name}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Quantity:</div>
-                                <div class="detail-value">${order.quantity}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Total Price:</div>
-                                <div class="detail-value">₹${order.total_price}</div>
-                            </div>
-                            <hr>
-                            <div class="detail-row">
-                                <div class="detail-label">Order Date:</div>
-                                <div class="detail-value">${new Date(order.order_date).toLocaleString()}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Payment Status:</div>
-                                <div class="detail-value">
-                                    <span class="status-badge status-${order.payment_status.toLowerCase()}">
-                                        ${order.payment_status}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Delivery Status:</div>
-                                <div class="detail-value">
-                                    <span class="status-badge status-${order.delivery_status.toLowerCase()}">
-                                        ${order.delivery_status}
-                                    </span>
-                                </div>
-                            </div>
-                            ${order.remarks ? `
-                            <div class="detail-row">
-                                <div class="detail-label">Remarks:</div>
-                                <div class="detail-value">${order.remarks}</div>
-                            </div>
-                            ` : ''}
+                    <div class="order-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Customer Name:</div>
+                            <div class="detail-value">${order.customer_name || 'N/A'}</div>
                         </div>
-                    `;
+                        <div class="detail-row">
+                            <div class="detail-label">Phone:</div>
+                            <div class="detail-value">${order.customer_phone || 'N/A'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Email:</div>
+                            <div class="detail-value">${order.customer_email || 'N/A'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Address:</div>
+                            <div class="detail-value">${order.customer_address || 'N/A'}</div>
+                        </div>
+                        <hr>
+                        <div class="detail-row">
+                            <div class="detail-label">Item Type:</div>
+                            <div class="detail-value">${order.product_id ? 'Product' : 'Course'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Item Name:</div>
+                            <div class="detail-value">${order.product_name || order.course_name || 'N/A'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Quantity:</div>
+                            <div class="detail-value">${order.quantity || '1'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Total Price:</div>
+                            <div class="detail-value">₹${order.total_price || '0'}</div>
+                        </div>
+                        <hr>
+                        <div class="detail-row">
+                            <div class="detail-label">Order Date:</div>
+                            <div class="detail-value">${order.order_date ? new Date(order.order_date).toLocaleString() : 'N/A'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Payment Status:</div>
+                            <div class="detail-value">
+                                <span class="status-badge status-${(order.payment_status || 'Pending').toLowerCase()}">
+                                    ${order.payment_status || 'Pending'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Delivery Status:</div>
+                            <div class="detail-value">
+                                <span class="status-badge status-${(order.delivery_status || 'Pending').toLowerCase()}">
+                                    ${order.delivery_status || 'Pending'}
+                                </span>
+                            </div>
+                        </div>
+                        ${order.remarks ? `
+                        <div class="detail-row">
+                            <div class="detail-label">Remarks:</div>
+                            <div class="detail-value">${order.remarks}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
 
                     document.getElementById('orderDetailsContent').innerHTML = content;
                     document.getElementById('orderDetailsModal').style.display = 'flex';
+                })
+                .catch(error => {
+                    console.error('Error fetching order details:', error);
+                    alert('Failed to load order details. Please try again.');
                 });
         }
 
@@ -837,6 +852,12 @@
         // Update Status Functions
         function updatePaymentStatus(orderId, isPaid) {
             const status = isPaid ? 'Paid' : 'Pending';
+
+            if (!confirm(`Change payment status to "${status}"?`)) {
+                // Revert checkbox if user cancels
+                event.target.checked = !isPaid;
+                return;
+            }
 
             fetch(`/admin/api/order/${orderId}`, {
                 method: 'PUT',
@@ -850,16 +871,24 @@
                         location.reload();
                     } else {
                         alert('Failed to update payment status');
+                        location.reload(); // Reload to sync UI
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     alert('Failed to update payment status');
+                    location.reload(); // Reload to sync UI
                 });
         }
 
         function updateDeliveryStatus(orderId, isDelivered) {
             const status = isDelivered ? 'Delivered' : 'Pending';
+
+            if (!confirm(`Change delivery status to "${status}"?`)) {
+                // Revert checkbox if user cancels
+                event.target.checked = !isDelivered;
+                return;
+            }
 
             fetch(`/admin/api/order/${orderId}`, {
                 method: 'PUT',
@@ -873,84 +902,101 @@
                         location.reload();
                     } else {
                         alert('Failed to update delivery status');
+                        location.reload();
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     alert('Failed to update delivery status');
+                    location.reload();
                 });
         }
 
-        // Filter Functions
+        // Filter Functions - Now works with server-side filtering
         function applyFilters() {
             const search = document.getElementById('search').value;
             const paymentStatus = document.getElementById('paymentStatus').value;
             const deliveryStatus = document.getElementById('deliveryStatus').value;
             const orderDate = document.getElementById('orderDate').value;
 
-            // Implement filtering logic
-            const rows = document.querySelectorAll('.data-table tbody tr');
+            // Build URL with parameters
+            let url = '/admin/orders?';
+            const params = new URLSearchParams();
 
-            rows.forEach(row => {
-                const customerName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                const payment = row.querySelector('td:nth-child(6) .status-badge').textContent;
-                const delivery = row.querySelector('td:nth-child(7) .status-badge').textContent;
-                const date = row.querySelector('td:nth-child(8)').textContent;
+            if (search) params.append('search', search);
+            if (paymentStatus) params.append('payment_status', paymentStatus);
+            if (deliveryStatus) params.append('delivery_status', deliveryStatus);
+            if (orderDate) params.append('start_date', orderDate);
 
-                let show = true;
-
-                if (search && !customerName.includes(search.toLowerCase())) {
-                    show = false;
-                }
-                if (paymentStatus && payment !== paymentStatus) {
-                    show = false;
-                }
-                if (deliveryStatus && delivery !== deliveryStatus) {
-                    show = false;
-                }
-
-                row.style.display = show ? '' : 'none';
-            });
+            window.location.href = url + params.toString();
         }
 
         function resetFilters() {
-            document.getElementById('search').value = '';
-            document.getElementById('paymentStatus').value = '';
-            document.getElementById('deliveryStatus').value = '';
-            document.getElementById('orderDate').value = '';
-
-            const rows = document.querySelectorAll('.data-table tbody tr');
-            rows.forEach(row => row.style.display = '');
+            window.location.href = '/admin/orders';
         }
 
         // Export to Excel
         function exportOrders() {
-            // Implement export functionality
-            alert('Export functionality will be implemented');
+            const search = document.getElementById('search').value;
+            const paymentStatus = document.getElementById('paymentStatus').value;
+            const deliveryStatus = document.getElementById('deliveryStatus').value;
+            const orderDate = document.getElementById('orderDate').value;
+
+            let url = '/admin/api/orders/export?';
+            const params = new URLSearchParams();
+
+            if (search) params.append('search', search);
+            if (paymentStatus) params.append('payment_status', paymentStatus);
+            if (deliveryStatus) params.append('delivery_status', deliveryStatus);
+            if (orderDate) params.append('start_date', orderDate);
+
+            window.open(url + params.toString(), '_blank');
         }
 
         // Edit Order
         function editOrder(orderId) {
-            // Implement edit functionality
-            alert('Edit order ' + orderId);
+            // Open order details and allow editing
+            viewOrderDetails(orderId);
+            // You can add edit functionality in the modal
+            alert('Edit functionality: You can modify details in the view modal');
         }
 
         // Delete Order
         function deleteOrder(orderId) {
             if (confirm('Are you sure you want to delete this order?')) {
                 fetch(`/admin/api/order/${orderId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
+                    method: 'DELETE'
                 })
                     .then(response => {
                         if (response.ok) {
                             location.reload();
+                        } else {
+                            alert('Failed to delete order');
                         }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to delete order');
                     });
             }
         }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('orderDetailsModal');
+            if (event.target == modal) {
+                closeDetailsModal();
+            }
+        }
+
+        // Set filter values from URL parameters on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            document.getElementById('search').value = urlParams.get('search') || '';
+            document.getElementById('paymentStatus').value = urlParams.get('payment_status') || '';
+            document.getElementById('deliveryStatus').value = urlParams.get('delivery_status') || '';
+            document.getElementById('orderDate').value = urlParams.get('start_date') || '';
+        });
     </script>
 </body>
 

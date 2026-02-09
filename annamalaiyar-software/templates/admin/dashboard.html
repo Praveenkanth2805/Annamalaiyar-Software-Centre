@@ -548,8 +548,8 @@
                                 {% for order in recent_orders %}
                                 <tr>
                                     <td>#{{ order.id }}</td>
-                                    <td>{{ order.name }}</td>
-                                    <td>{{ order.phone }}</td>
+                                    <td>{{ order.name or order.customer_name }}</td> <!-- Fixed -->
+                                    <td>{{ order.phone or order.customer_phone }}</td> <!-- Fixed -->
                                     <td>₹{{ order.total_price }}</td>
                                     <td>
                                         <span class="status-badge status-{{ order.payment_status.lower() }}">
@@ -561,13 +561,11 @@
                                             {{ order.delivery_status }}
                                         </span>
                                     </td>
-                                    <td>{{ order.order_date.strftime('%d-%m-%Y') }}</td>
+                                    <td>{{ order.order_date.strftime('%d-%m-%Y') if order.order_date else '' }}</td>
                                     <td>
-                                        <a href="#" class="action-btn btn-view">
+                                        <a href="{{ url_for('admin_orders') }}?order_id={{ order.id }}"
+                                            class="action-btn btn-view">
                                             <span class="material-icons">visibility</span>
-                                        </a>
-                                        <a href="#" class="action-btn btn-edit">
-                                            <span class="material-icons">edit</span>
                                         </a>
                                     </td>
                                 </tr>

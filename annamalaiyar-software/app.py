@@ -535,9 +535,13 @@ def admin_orders():
     
     # Build query with filters
     query = """
-        SELECT o.*, c.name as customer_name, c.phone as customer_phone, 
-               c.email as customer_email, c.address as customer_address,
-               p.name as product_name, cs.name as course_name
+        SELECT o.*, 
+               c.name as customer_name, 
+               c.phone as customer_phone, 
+               c.email as customer_email, 
+               c.address as customer_address,
+               p.name as product_name, 
+               cs.name as course_name
         FROM orders o
         JOIN customers c ON o.customer_id = c.id
         LEFT JOIN products p ON o.product_id = p.id
@@ -547,8 +551,8 @@ def admin_orders():
     params = []
     
     if search:
-        query += " AND (c.name LIKE %s OR c.phone LIKE %s)"
-        params.extend([f"%{search}%", f"%{search}%"])
+        query += " AND (c.name LIKE %s OR c.phone LIKE %s OR c.email LIKE %s)"
+        params.extend([f"%{search}%", f"%{search}%", f"%{search}%"])
     
     if payment_status:
         query += " AND o.payment_status = %s"
@@ -572,7 +576,13 @@ def admin_orders():
     orders = cur.fetchall()
     cur.close()
     
-    return render_template('admin/orders.html', orders=orders)
+    return render_template('admin/orders.html', 
+                         orders=orders,
+                         search=search,
+                         payment_status=payment_status,
+                         delivery_status=delivery_status,
+                         start_date=start_date,
+                         end_date=end_date)
 
 @app.route('/admin/api/order/<int:order_id>', methods=['GET', 'PUT', 'DELETE'])
 def api_order(order_id):
@@ -596,22 +606,22 @@ def api_order(order_id):
         
         if order:
             return jsonify({
-                'id': order[0],
-                'customer_id': order[1],
-                'product_id': order[2],
-                'course_id': order[3],
-                'quantity': order[4],
-                'total_price': float(order[5]),
-                'payment_status': order[6],
-                'delivery_status': order[7],
-                'order_date': order[8].strftime('%Y-%m-%d %H:%M:%S') if order[8] else None,
-                'remarks': order[9],
-                'customer_name': order[10],
-                'customer_phone': order[11],
-                'customer_email': order[12],
-                'customer_address': order[13],
-                'product_name': order[14],
-                'course_name': order[15]
+                'id': order['id'],
+                'customer_id': order['customer_id'],
+                'product_id': order['product_id'],
+                'course_id': order['course_id'],
+                'quantity': order['quantity'],
+                'total_price': float(order['total_price']),
+                'payment_status': order['payment_status'],
+                'delivery_status': order['delivery_status'],
+                'order_date': order['order_date'].strftime('%Y-%m-%d %H:%M:%S') if order.get('order_date') else None,
+                'remarks': order.get('remarks'),
+                'customer_name': order['customer_name'],
+                'customer_phone': order['customer_phone'],
+                'customer_email': order['customer_email'],
+                'customer_address': order['customer_address'],
+                'product_name': order['product_name'],
+                'course_name': order['course_name']
             })
         return jsonify({'error': 'Order not found'}), 404
     
