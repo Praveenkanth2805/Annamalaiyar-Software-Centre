@@ -341,13 +341,13 @@ def api_product():
         
         if product:
             return jsonify({
-                'id': product[0],
-                'name': product[1],
-                'description': product[2],
-                'price': float(product[3]),
-                'stock': product[4],
-                'image_path': product[5],
-                'is_featured': bool(product[6])
+                'id': product['id'],
+                'name': product['name'],
+                'description': product['description'],
+                'price': float(product['price']),
+                'stock': product['stock'],
+                'image_path': product['image_path'],
+                'is_featured': bool(product['is_featured'])
             })
         return jsonify({'error': 'Product not found'}), 404
     
@@ -413,7 +413,7 @@ def api_product():
         cur.close()
         
         return jsonify({'success': True})
-
+    
 # ==================== COURSE MANAGEMENT ====================
 @app.route('/admin/courses')
 def admin_courses():
@@ -442,14 +442,14 @@ def api_course():
         
         if course:
             return jsonify({
-                'id': course[0],
-                'name': course[1],
-                'description': course[2],
-                'duration': course[3],
-                'price': float(course[4]),
-                'seats': course[5],
-                'image_path': course[6],
-                'is_featured': bool(course[7])
+                'id': course['id'],
+                'name': course['name'],
+                'description': course['description'],
+                'duration': course['duration'],
+                'price': float(course['price']),
+                'seats': course['seats'],
+                'image_path': course['image_path'],
+                'is_featured': bool(course['is_featured'])
             })
         return jsonify({'error': 'Course not found'}), 404
     
@@ -517,7 +517,7 @@ def api_course():
         cur.close()
         
         return jsonify({'success': True})
-
+    
 # ==================== ORDER MANAGEMENT ====================
 @app.route('/admin/orders')
 def admin_orders():
@@ -854,21 +854,21 @@ def api_customer(customer_id):
             
             return jsonify({
                 'customer': {
-                    'id': customer[0],
-                    'name': customer[1],
-                    'phone': customer[2],
-                    'email': customer[3],
-                    'address': customer[4],
-                    'created_at': customer[5].strftime('%Y-%m-%d %H:%M:%S') if customer[5] else None
+                    'id': customer['id'],
+                    'name': customer['name'],
+                    'phone': customer['phone'],
+                    'email': customer['email'],
+                    'address': customer['address'],
+                    'created_at': customer['created_at'].strftime('%Y-%m-%d %H:%M:%S') if customer.get('created_at') else None
                 },
                 'orders': [{
-                    'id': order[0],
-                    'item_name': order[10],
-                    'quantity': order[4],
-                    'total_price': float(order[5]),
-                    'payment_status': order[6],
-                    'delivery_status': order[7],
-                    'order_date': order[8].strftime('%Y-%m-%d %H:%M:%S') if order[8] else None
+                    'id': order['id'],
+                    'item_name': order['item_name'],
+                    'quantity': order['quantity'],
+                    'total_price': float(order['total_price']),
+                    'payment_status': order['payment_status'],
+                    'delivery_status': order['delivery_status'],
+                    'order_date': order['order_date'].strftime('%Y-%m-%d %H:%M:%S') if order.get('order_date') else None
                 } for order in orders]
             })
         cur.close()
@@ -898,7 +898,7 @@ def api_customer(customer_id):
         mysql.connection.commit()
         cur.close()
         return jsonify({'success': True})
-
+    
 # ==================== REPORTS ====================
 @app.route('/admin/reports')
 def admin_reports():
